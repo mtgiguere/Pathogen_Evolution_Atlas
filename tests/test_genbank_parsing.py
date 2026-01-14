@@ -64,3 +64,10 @@ def test_parse_location_empty():
     """
     assert parse_location("") == (None, None)
     assert parse_location(None) == (None, None)
+
+def test_parse_collection_date_month_name_year():
+    """
+    GenBank sometimes uses month abbreviations like 'Dec-2019'.
+    We normalize that to the first day of that month.
+    """
+    assert parse_collection_date("Dec-2019") == date(2019, 12, 1)
