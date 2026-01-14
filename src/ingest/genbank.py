@@ -2,6 +2,7 @@
 genbank.py
 """
 from datetime import date
+import time
 from typing import Optional
 from typing import Tuple
 from typing import Any, Dict
@@ -9,7 +10,9 @@ from .models import CanonicalGenomeRecord
 from typing import Any, Dict, Optional
 from Bio import Entrez, SeqIO
 
-
+# NCBI guideline: no more than ~3 requests/second
+_MIN_SECONDS_BETWEEN_REQUESTS = 1.0 / 3.0
+_LAST_REQUEST_TS = None
 
 def parse_collection_date(raw: Optional[str]) -> Optional[date]:
     """
@@ -108,6 +111,7 @@ def fetch_genbank_minimal(accession: str, email: str) -> Dict[str, Any]:
     Entrez.email = email
 
     # Fetch the GenBank flatfile for this accession.
+    _rate_limit()
     with Entrez.efetch(db="nuccore", id=accession, rettype="gb", retmode="text") as handle:
         record = SeqIO.read(handle, "genbank")
 
@@ -180,3 +184,18 @@ def normalize_genbank_minimal(raw: Dict[str, Any]) -> CanonicalGenomeRecord:
         source="genbank",
     )
 
+def _rate_limit() -> None:
+    """
+    Enforce a minimum delay between NCBI requests so we stay under
+    the recommended rate limit (~3 requests per second).
+    """
+    global _LAST_REQUEST_TS
+
+    now = time.monotonic()
+    if _LAST_REQUEST_TS is not None:
+        elapsed = now - _LAST_REQUEST_TS
+        remaining = _MIN_SECONDS_BETWEEN_REQUESTS - elapsed
+        if remaining > 0:
+            time.sleep(remaining)
+
+    _LAST_REQUEST_TS = time.monotonic()
