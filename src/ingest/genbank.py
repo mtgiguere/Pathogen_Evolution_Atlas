@@ -8,6 +8,7 @@ from typing import Tuple
 from typing import Any, Dict
 from .models import CanonicalGenomeRecord
 from typing import Any, Dict, Optional
+from typing import Iterable, List
 from Bio import Entrez, SeqIO
 
 # NCBI guideline: no more than ~3 requests/second
@@ -199,3 +200,29 @@ def _rate_limit() -> None:
             time.sleep(remaining)
 
     _LAST_REQUEST_TS = time.monotonic()
+
+def fetch_many_genbank_minimal(accessions: Iterable[str], email: str) -> List[dict]:
+    """
+    Fetch many GenBank records and return a list of minimal dicts.
+
+    Note: This function intentionally keeps behavior simple:
+    - preserves input order
+    - uses the single-record fetch function internally
+    """
+    return [fetch_genbank_minimal(a, email=email) for a in accessions]
+
+
+def normalize_many_genbank_minimal(raw_records: Iterable[Dict[str, Any]]) -> List[CanonicalGenomeRecord]:
+    """
+    Normalize many minimal GenBank-like dicts into CanonicalGenomeRecord objects.
+    Preserves input order.
+    """
+    return [normalize_genbank_minimal(r) for r in raw_records]
+
+def fetch_and_normalize_many(accessions: Iterable[str], email: str):
+    """
+    Convenience helper: fetch many GenBank records and immediately normalize them
+    into CanonicalGenomeRecord objects.
+    """
+    raws = fetch_many_genbank_minimal(accessions=accessions, email=email)
+    return normalize_many_genbank_minimal(raws)
