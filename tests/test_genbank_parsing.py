@@ -4,13 +4,12 @@ Unit Tests genbank.py.
 
 #Imports needed for this python page
 from datetime import date
-from src.ingest.genbank import parse_location
 
 # We are importing the function we are testing.
 # This is the heart of Test-Driven Development:
 #   "Does this function behave the way we expect?"
-from src.ingest.genbank import parse_collection_date
-from src.ingest.genbank import parse_location
+from src.ingest.genbank import parse_collection_date, parse_location
+
 
 def test_parse_collection_date_full():
     """

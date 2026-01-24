@@ -2,9 +2,12 @@
 Unit Tests
 """
 
-from src.ingest.genbank import fetch_many_genbank_minimal
-from src.ingest.genbank import normalize_many_genbank_minimal
-from src.ingest.genbank import fetch_and_normalize_many
+from src.ingest.genbank import (
+    fetch_and_normalize_many,
+    fetch_many_genbank_minimal,
+    normalize_many_genbank_minimal,
+)
+
 
 def test_fetch_many_returns_one_dict_per_accession(monkeypatch):
     """
@@ -37,7 +40,6 @@ def test_normalize_many_returns_canonical_records(monkeypatch):
     Batch normalization should return CanonicalGenomeRecord objects,
     preserving order.
     """
-    from src.ingest import genbank
 
     fake_raw = {
         "accession": "A1",

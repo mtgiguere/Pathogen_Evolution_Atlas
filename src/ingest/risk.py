@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Iterable, Any
+from collections.abc import Iterable
+from typing import Any
 
 from .counts import count_mutations_by_gene
 from .mutations import Mutation

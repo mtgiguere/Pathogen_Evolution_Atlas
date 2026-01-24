@@ -1,21 +1,20 @@
 """
 genbank.py
 """
-from datetime import date
 import time
-from typing import Optional
-from typing import Tuple
-from typing import Any, Dict
-from .models import CanonicalGenomeRecord
-from typing import Any, Dict, Optional
-from typing import Iterable, List
+from collections.abc import Iterable
+from datetime import date
+from typing import Any
+
 from Bio import Entrez, SeqIO
+
+from .models import CanonicalGenomeRecord
 
 # NCBI guideline: no more than ~3 requests/second
 _MIN_SECONDS_BETWEEN_REQUESTS = 1.0 / 3.0
 _LAST_REQUEST_TS = None
 
-def parse_collection_date(raw: Optional[str]) -> Optional[date]:
+def parse_collection_date(raw: str | None) -> date | None:
     """
     Convert a GenBank-style collection date string into a Python date object.
 
@@ -80,7 +79,7 @@ def parse_collection_date(raw: Optional[str]) -> Optional[date]:
     # Anything else is malformed → treat as unknown
     return None
 
-def parse_location(raw: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+def parse_location(raw: str | None) -> tuple[str | None, str | None]:
     """
     Normalize a location string into (country, region).
 
@@ -100,7 +99,7 @@ def parse_location(raw: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
 
     return (s, None)
 
-def fetch_genbank_minimal(accession: str, email: str) -> Dict[str, Any]:
+def fetch_genbank_minimal(accession: str, email: str) -> dict[str, Any]:
     """
     Fetch a single GenBank record from NCBI and extract only the fields we need
     for our MVP "minimal dict" intake format.
@@ -142,7 +141,7 @@ def fetch_genbank_minimal(accession: str, email: str) -> Dict[str, Any]:
         "sequence": sequence,
     }
 
-def normalize_genbank_minimal(raw: Dict[str, Any]) -> CanonicalGenomeRecord:
+def normalize_genbank_minimal(raw: dict[str, Any]) -> CanonicalGenomeRecord:
     """
     Convert a minimal GenBank-like dict into our CanonicalGenomeRecord.
 
@@ -201,7 +200,7 @@ def _rate_limit() -> None:
 
     _LAST_REQUEST_TS = time.monotonic()
 
-def fetch_many_genbank_minimal(accessions: Iterable[str], email: str) -> List[dict]:
+def fetch_many_genbank_minimal(accessions: Iterable[str], email: str) -> list[dict]:
     """
     Fetch many GenBank records and return a list of minimal dicts.
 
@@ -212,7 +211,7 @@ def fetch_many_genbank_minimal(accessions: Iterable[str], email: str) -> List[di
     return [fetch_genbank_minimal(a, email=email) for a in accessions]
 
 
-def normalize_many_genbank_minimal(raw_records: Iterable[Dict[str, Any]]) -> List[CanonicalGenomeRecord]:
+def normalize_many_genbank_minimal(raw_records: Iterable[dict[str, Any]]) -> list[CanonicalGenomeRecord]:
     """
     Normalize many minimal GenBank-like dicts into CanonicalGenomeRecord objects.
     Preserves input order.

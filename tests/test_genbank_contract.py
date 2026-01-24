@@ -1,9 +1,12 @@
 """
 Unit Tests models.py
 """
-import pytest
 from datetime import date
+
+import pytest
+
 from src.ingest.genbank import normalize_genbank_minimal
+
 
 def test_normalize_genbank_minimal_happy_path():
     raw = {

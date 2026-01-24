@@ -1,5 +1,5 @@
-from src.ingest.mutations import Mutation
 from src.ingest.counts import count_mutations_by_gene
+from src.ingest.mutations import Mutation
 
 
 def test_count_mutations_by_gene_basic():

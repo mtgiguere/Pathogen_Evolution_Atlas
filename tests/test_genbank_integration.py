@@ -3,8 +3,10 @@ Integration Tests
 """
 
 import os
-import pytest
 import time
+
+import pytest
+
 from src.ingest.genbank import fetch_genbank_minimal, normalize_genbank_minimal
 
 
