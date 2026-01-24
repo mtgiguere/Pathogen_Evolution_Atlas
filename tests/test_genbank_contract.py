@@ -37,14 +37,6 @@ def test_normalize_requires_accession_and_organism():
     with pytest.raises(ValueError):
         normalize_genbank_minimal({"sequence": "ACGT"})
 
-def test_normalize_requires_accession_and_organism():
-    """
-    accession and organism are required for our canonical contract.
-    If they are missing/blank, normalize should raise ValueError.
-    """
-    with pytest.raises(ValueError):
-        normalize_genbank_minimal({"sequence": "ACGT"})
-
 def test_normalize_missing_optional_fields():
     """
     missing optional fields

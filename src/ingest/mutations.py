@@ -19,7 +19,7 @@ def diff_sequences(ref: str, sample: str) -> list[Mutation]:
 
     mutations: list[Mutation] = []
 
-    for i, (r, s) in enumerate(zip(ref, sample), start=1):
+    for i, (r, s) in enumerate(zip(ref, sample, strict=True), start=1):
         if r.upper() == "N" or s.upper() == "N":
             continue
         if r != s:
