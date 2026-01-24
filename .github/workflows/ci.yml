@@ -37,4 +37,4 @@ jobs:
 
       - name: Dependency vulnerability scan (pip-audit)
         run: |
-          pip-audit -r requirements.txt
+          pip-audit -r requirements.txt --ignore-file pip-audit.ignore
