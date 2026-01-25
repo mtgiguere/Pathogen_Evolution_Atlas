@@ -29,13 +29,8 @@ def summarize_genomes(records: Iterable[dict]) -> pd.DataFrame:
 
     ref_seq = _get(ref_rec, "sequence") if ref_rec is not None else None
 
-    print("DEBUG reference accession:", _get(ref_rec, "accession") if ref_rec else None)
-    print("DEBUG reference seq length:", len(ref_seq) if ref_seq else None)
-
     # show first record sequence length too
     first = records[0] if records else None
-    print("DEBUG first accession:", _get(first, "accession") if first else None)
-    print("DEBUG first seq length:", len(_get(first, "sequence") or "") if first else None)
 
 
     rows = []
@@ -100,7 +95,6 @@ def summarize_genomes(records: Iterable[dict]) -> pd.DataFrame:
         )
 
     df = pd.DataFrame(rows)
-    print("DEBUG scorable count:", int(df["scorable"].sum()), "out of", len(df))
     return df
 
 
