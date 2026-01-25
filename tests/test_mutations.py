@@ -1,4 +1,3 @@
-import pytest
 
 from src.ingest.mutations import Mutation, diff_sequences
 

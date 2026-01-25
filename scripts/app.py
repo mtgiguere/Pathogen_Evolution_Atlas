@@ -1,8 +1,6 @@
 import streamlit as st
-import pandas as pd
 
 from ingest.analytics import summarize_genomes
-
 from ingest.io import load_ndjson
 
 records = load_ndjson("data/raw/genomes.ndjson")

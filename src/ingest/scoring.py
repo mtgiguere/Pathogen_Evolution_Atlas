@@ -4,10 +4,12 @@ End-to-end scoring orchestration (dependency-injection friendly).
 """
 
 from __future__ import annotations
+
 from typing import Any
-from collections.abc import Callable
+
 from ingest.mutations import Mutation, diff_sequences
 from ingest.risk import score_mutations
+
 
 def _identify_mutations(record: Any):
     """
