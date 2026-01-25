@@ -29,10 +29,6 @@ def summarize_genomes(records: Iterable[dict]) -> pd.DataFrame:
 
     ref_seq = _get(ref_rec, "sequence") if ref_rec is not None else None
 
-    # show first record sequence length too
-    first = records[0] if records else None
-
-
     rows = []
     for r in records:
         seq = _get(r, "sequence") or ""
