@@ -1,3 +1,6 @@
+"""
+mutations.py
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,8 +17,14 @@ class Mutation:
 
 
 def diff_sequences(ref: str, sample: str) -> list[Mutation]:
-    if len(ref) != len(sample):
-        raise ValueError("Sequences must be the same length")
+    # Real-world sequences are often trimmed/partial.
+    # For v1, diff only the overlapping region.
+    L = min(len(ref), len(sample))
+    ref = ref[:L]
+    sample = sample[:L]
+
+    # if len(ref) != len(sample):
+    #     raise ValueError("Sequences must be the same length")
 
     mutations: list[Mutation] = []
 

@@ -1,10 +1,13 @@
+"""
+fetch_genbank_accessions.py
+"""
 from __future__ import annotations
 
 import argparse
 import os
 
-from src.ingest.genbank import fetch_and_normalize_many
-from src.ingest.io import write_ndjson
+from ingest.genbank import fetch_and_normalize_many
+from ingest.io import write_ndjson
 
 
 def main() -> None:

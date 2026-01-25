@@ -52,6 +52,7 @@ def load_ndjson(path: str | Path) -> list[CanonicalGenomeRecord]:
                     region=obj.get("region"),
                     host=obj.get("host"),
                     sequence_length=int(obj.get("sequence_length", 0)),
+                    sequence=obj.get("sequence"),
                     source=str(obj.get("source", "genbank")),
                 )
             )

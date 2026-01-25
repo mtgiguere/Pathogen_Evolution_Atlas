@@ -54,8 +54,19 @@ def parse_collection_date(raw: str | None) -> date | None:
 
     # Case 1: full date (year, month, day)
     if len(parts) == 3:
-        y, m, d = parts
-        return date(int(y), int(m), int(d))
+        y, m, d = (p.strip() for p in parts)
+
+        try:
+            # If month is a name like "Dec"
+            m_key = m[:3].lower()
+            if m_key in MONTHS and not m.isdigit():
+                return date(int(y), MONTHS[m_key], int(d))
+
+            return date(int(y), int(m), int(d))
+        except ValueError:
+            # GenBank occasionally has malformed dates (e.g., Feb-30).
+            # Treat as unknown so ingestion doesn't crash.
+            return None
 
     # Case 2: year and month only → assume day = 1
     # This lets us still place the sample on a timeline.
@@ -181,8 +192,10 @@ def normalize_genbank_minimal(raw: dict[str, Any]) -> CanonicalGenomeRecord:
         region=region,
         host=host,
         sequence_length=sequence_length,
+        sequence=seq_str,
         source="genbank",
     )
+
 
 def _rate_limit() -> None:
     """

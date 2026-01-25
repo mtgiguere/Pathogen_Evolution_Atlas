@@ -23,3 +23,4 @@ class CanonicalGenomeRecord:
     host: str | None
     sequence_length: int
     source: str = "genbank"
+    sequence: str | None = None
