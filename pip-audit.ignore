@@ -1,0 +1,14 @@
+# CVE-2025-68463 affects Biopython 1.86.
+# As of this project version, no patched Biopython release is available upstream.
+#
+# Risk assessment:
+# - Data source is trusted (NCBI GenBank)
+# - Usage is read-only parsing
+# - No user-supplied or attacker-controlled inputs
+# - No privileged execution context
+#
+# Action:
+“CVE-2026-0994 tracked; waiting for upstream fix; not exploitable in our current threat model because we do not parse untrusted Protobuf JSON.”
+# - Re-evaluate and remove this ignore when Biopython releases a fixed version.
+CVE-2025-68463
+CVE-2026-0994
