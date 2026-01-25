@@ -8,5 +8,7 @@
 # - No privileged execution context
 #
 # Action:
+“CVE-2026-0994 tracked; waiting for upstream fix; not exploitable in our current threat model because we do not parse untrusted Protobuf JSON.”
 # - Re-evaluate and remove this ignore when Biopython releases a fixed version.
 CVE-2025-68463
+CVE-2026-0994

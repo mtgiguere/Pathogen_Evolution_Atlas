@@ -37,4 +37,4 @@ jobs:
 
       - name: Dependency vulnerability scan (pip-audit)
         run: |
-          pip-audit -r requirements.txt --ignore-vuln CVE-2025-68463
+          pip-audit -r requirements.txt --ignore-vuln CVE-2025-68463, CVE-2026-0994
