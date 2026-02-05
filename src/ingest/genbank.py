@@ -14,6 +14,31 @@ from .models import CanonicalGenomeRecord
 _MIN_SECONDS_BETWEEN_REQUESTS = 1.0 / 3.0
 _LAST_REQUEST_TS = None
 
+def _first_qualifier(qualifiers: dict[str, Any], key: str) -> str | None:
+    v = qualifiers.get(key)
+    if not v:
+        return None
+    if isinstance(v, list):
+        return v[0] if v else None
+    return str(v)
+
+def _find_source_feature(record):
+    for f in getattr(record, "features", []) or []:
+        if getattr(f, "type", None) == "source":
+            return f
+    return None
+
+def _extract_biosample(qualifiers: dict[str, Any]) -> str | None:
+    dbx = qualifiers.get("db_xref") or []
+    if not isinstance(dbx, list):
+        dbx = [dbx]
+    for item in dbx:
+        s = str(item)
+        if s.startswith("BioSample:"):
+            return s.split(":", 1)[1].strip() or None
+    return None
+
+
 def parse_collection_date(raw: str | None) -> date | None:
     """
     Convert a GenBank-style collection date string into a Python date object.
@@ -128,7 +153,7 @@ def fetch_genbank_minimal(accession: str, email: str) -> dict[str, Any]:
 
     # GenBank stores most useful metadata on the "source" feature.
     # It is typically the first feature in the record.
-    source_feature = record.features[0] if record.features else None
+    source_feature = _find_source_feature(record)
     qualifiers = source_feature.qualifiers if source_feature else {}
 
     # Common qualifier keys we care about:
@@ -136,9 +161,13 @@ def fetch_genbank_minimal(accession: str, email: str) -> dict[str, Any]:
     # - country (often formatted like "USA: California")
     # - host
     collection_date = (qualifiers.get("collection_date") or [None])[0]
-    location = (qualifiers.get("country") or [None])[0]
+    location = (
+        _first_qualifier(qualifiers, "country")
+        or _first_qualifier(qualifiers, "geo_loc_name")
+    )
     host = (qualifiers.get("host") or [None])[0]
-
+    lat_lon = _first_qualifier(qualifiers, "lat_lon")
+    biosample = _extract_biosample(qualifiers)
     organism = record.annotations.get("organism", "") or ""
     sequence = str(record.seq)
 
@@ -150,6 +179,8 @@ def fetch_genbank_minimal(accession: str, email: str) -> dict[str, Any]:
         "location": location,
         "host": host,
         "sequence": sequence,
+        "lat_lon": lat_lon,
+        "biosample": biosample,
     }
 
 def normalize_genbank_minimal(raw: dict[str, Any]) -> CanonicalGenomeRecord:
