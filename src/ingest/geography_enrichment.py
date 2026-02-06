@@ -1,19 +1,13 @@
+from __future__ import annotations
 
-"""
-geography_enrichment.py
-Geographic normalization and resolution logic.
-
-This module is responsible for turning raw location metadata
-into map-ready coordinates or regions.clear
-
-"""
 from dataclasses import replace
 from typing import Optional, Iterable, List
+from xml.etree import ElementTree as ET
+
 from Bio import Entrez
 
 from .models import CanonicalGenomeRecord
 from .genbank import parse_location
-
 
 def enrich_location_from_biosample(
     record: CanonicalGenomeRecord,
@@ -29,37 +23,57 @@ def enrich_location_from_biosample(
     country, region = parse_location(geo)
     return replace(record, country=country, region=region)
 
-
-
 def _fetch_biosample_geo_loc(accession: str, email: str) -> Optional[str]:
+    """
+    Try to enrich geography via:
+      nuccore accession -> elink to biosample -> efetch biosample XML -> find geo_loc_name
+    Uses ElementTree because some BioSample XML responses do not include a DTD/schema,
+    which makes Bio.Entrez.read() raise.
+    """
     Entrez.email = email
 
-    # nuccore → biosample
+    # 1) nuccore → biosample ids
     with Entrez.elink(dbfrom="nuccore", db="biosample", id=accession) as h:
         link = Entrez.read(h)
 
-    ids = link[0].get("LinkSetDb", [])
-    if not ids:
+    linksetdb = link[0].get("LinkSetDb", []) if link else []
+    if not linksetdb:
         return None
 
-    biosample_ids = ids[0]["Link"]
-    if not biosample_ids:
+    links = linksetdb[0].get("Link", [])
+    if not links:
         return None
 
-    bs_id = biosample_ids[0]["Id"]
+    bs_id = links[0].get("Id")
+    if not bs_id:
+        return None
 
+    # 2) biosample efetch -> raw XML -> ElementTree parse
     with Entrez.efetch(db="biosample", id=bs_id, retmode="xml") as h:
-        try:
-            doc = Entrez.read(h, validate=False)
-        except Exception:
-            # BioSample XML is often missing a DTD
-            # Enrichment is best-effort; never crash
-            return None
+        xml_bytes = h.read()
 
-    attrs = doc[0].get("Attributes", [])
-    for a in attrs:
-        if a.get("attribute_name") == "geo_loc_name":
-            return a.get("content")
+    if not xml_bytes:
+        return None
+
+    # Entrez handle may return bytes; ET wants bytes or str
+    try:
+        root = ET.fromstring(xml_bytes)
+    except ET.ParseError:
+        # Sometimes NCBI returns an HTML error page or truncated XML
+        return None
+
+    # 3) Find any attribute named geo_loc_name, return its text/content
+    #
+    # BioSample XML commonly looks like:
+    # <BioSampleSet>
+    #   <BioSample ...>
+    #     <Attributes>
+    #       <Attribute attribute_name="geo_loc_name">USA: California</Attribute>
+    #
+    for attr in root.findall(".//Attribute"):
+        if attr.get("attribute_name") == "geo_loc_name":
+            val = (attr.text or "").strip()
+            return val or None
 
     return None
 
@@ -67,18 +81,10 @@ def enrich_many_locations(
     records: Iterable[CanonicalGenomeRecord],
     email: str,
 ) -> List[CanonicalGenomeRecord]:
-    """
-    Enrich a collection of CanonicalGenomeRecords with geographic metadata.
-
-    Only records missing country information will be enriched.
-    Preserves input order.
-    """
     enriched: List[CanonicalGenomeRecord] = []
-
     for r in records:
         if r.country:
             enriched.append(r)
         else:
             enriched.append(enrich_location_from_biosample(r, email=email))
-
     return enriched
