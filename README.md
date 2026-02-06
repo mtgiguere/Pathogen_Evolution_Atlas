@@ -33,6 +33,21 @@ Outputs can be explored through an interactive dashboard or queried via an API.
 
 ---
 
+### ⚠️ Note on Geographic Metadata
+
+Not all genomic datasets include geographic location information.
+
+The current development dataset consists of recent (2025–2026) human
+surveillance genomes that intentionally omit country and regional metadata.
+This reflects modern privacy-preserving genomic surveillance practices.
+
+As a result:
+- Evolutionary and temporal analyses are fully supported
+- Geographic analyses are conditionally supported when location metadata exists
+- The system architecture supports geography, but availability depends on source data
+
+---
+
 ## Scientific Focus
 
 This project focuses on:
@@ -60,7 +75,7 @@ Each genome record includes:
 
 - Nucleotide sequence  
 - Collection date  
-- Geographic location  
+- Geographic location  (when available)  
 - Lineage or variant annotation  
 
 ---

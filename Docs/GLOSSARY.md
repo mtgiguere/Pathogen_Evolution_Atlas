@@ -30,3 +30,8 @@ independent of its original data source.
 **Risk score**  
 A simple, explainable numerical summary of mutation burden,
 weighted by gene importance.
+
+**Geographic enrichment**  
+Optional augmentation of genome records with location metadata
+from linked external sources. Availability depends on data provenance
+and privacy constraints.
