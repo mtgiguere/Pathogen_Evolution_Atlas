@@ -1,5 +1,49 @@
 
 from src.ingest.mutations import Mutation, diff_sequences
+from src.ingest.mutations import qc_compare_to_reference
+
+
+def test_qc_fails_low_overlap():
+    ref = "A" * 100
+    sample = "A" * 50
+
+    qc = qc_compare_to_reference(ref, sample, min_overlap=80)
+
+    assert qc.status == "FAIL"
+    assert "LOW_OVERLAP" in qc.reasons
+    assert qc.overlap_len == 50
+
+
+def test_qc_fails_high_n_fraction():
+    ref = "A" * 100
+    sample = ("A" * 50) + ("N" * 50)
+
+    qc = qc_compare_to_reference(ref, sample, min_overlap=80, max_n_fraction=0.10)
+
+    assert qc.status == "FAIL"
+    assert "HIGH_N_FRACTION" in qc.reasons
+    # In overlap, N fraction should be 0.5
+    assert abs(qc.n_fraction - 0.5) < 1e-9
+
+
+def test_qc_fails_high_non_acgt_fraction():
+    ref = "A" * 100
+    sample = ("A" * 90) + ("R" * 10)  # IUPAC ambiguity
+
+    qc = qc_compare_to_reference(ref, sample, min_overlap=80, max_non_acgt_fraction=0.05)
+
+    assert qc.status == "FAIL"
+    assert "HIGH_NON_ACGT_FRACTION" in qc.reasons
+
+
+def test_qc_passes_clean_sample():
+    ref = "ACGT" * 25  # 100 bases
+    sample = "ACGT" * 25
+
+    qc = qc_compare_to_reference(ref, sample, min_overlap=80)
+
+    assert qc.status == "PASS"
+    assert qc.reasons == []
 
 
 def test_diff_sequences_simple_substitution():

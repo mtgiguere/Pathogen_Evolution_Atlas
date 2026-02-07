@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import pytest
 import pandas as pd
 
 
@@ -23,14 +23,11 @@ def test_summarize_genomes_marks_scorable_and_skip_reasons(monkeypatch):
     # Use long toy sequences so we don't trip the "too_short" gate.
     ref_seq = "A" * 2000
 
+    # Use long toy sequences so we don't trip the "too_short" gate.
+    reference_sequence = "A" * 2000
+    reference_accession = "NC_045512.2"
+
     records = [
-        # Reference present (lets analytics find a reference without fallback)
-        {
-            "accession": "NC_045512",
-            "source": "genbank",
-            "sequence": ref_seq,
-            "collection_date": "2019-12-01",
-        },
         # Scorable record (long enough + has sequence)
         {
             "accession": "SAMPLE_FULL",
@@ -52,7 +49,21 @@ def test_summarize_genomes_marks_scorable_and_skip_reasons(monkeypatch):
         },
     ]
 
-    df = analytics.summarize_genomes(records)
+    reference_sequence = "A" * 2000
+    reference_accession = "NC_045512.2"
+    df = analytics.summarize_genomes(
+        records,
+        reference_sequence=reference_sequence,
+        reference_accession=reference_accession,
+    )
+
+
+    df = analytics.summarize_genomes(
+        records,
+        reference_sequence=reference_sequence,
+        reference_accession=reference_accession,
+    )
+
     assert isinstance(df, pd.DataFrame)
 
     # Required columns (adjust only if you renamed in analytics.py)
@@ -95,33 +106,18 @@ def test_summarize_genomes_marks_scorable_and_skip_reasons(monkeypatch):
     assert row_short["risk_level"] == "N/A"
 
 
-def test_summarize_genomes_reference_fallback_when_nc_missing(monkeypatch):
+def test_summarize_genomes_requires_reference_sequence(monkeypatch):
     import ingest.analytics as analytics
 
     def fake_score_genome(rec):
-        return {
-            "accession": rec["accession"],
-            "source": rec.get("source", "genbank"),
-            "num_mutations": 0,
-            "genes_affected": [],
-            "risk_score": 0.0,
-            "risk_level": "Low",
-            "risk_explanation": "No gene-attributed mutations detected.",
-        }
+        return {"accession": rec["accession"]}
 
     monkeypatch.setattr(analytics, "score_genome", fake_score_genome)
 
-    # No NC_045512, but long sequences exist -> fallback reference should exist
-    records = [
-        {"accession": "PX1", "source": "genbank", "sequence": "A" * 2000},
-        {"accession": "PX2", "source": "genbank", "sequence": "A" * 2100},
-    ]
+    records = [{"accession": "PX1", "source": "genbank", "sequence": "A" * 2000}]
 
-    df = analytics.summarize_genomes(records)
-
-    # Should not mark missing_reference because fallback selects a reference sequence
-    assert (df["skip_reason"] == "missing_reference").sum() == 0
-    assert df["scorable"].all()
+    with pytest.raises(TypeError):
+        analytics.summarize_genomes(records)  # missing required kw-only args
 
 
 def test_summarize_genomes_handles_empty_input(monkeypatch):
@@ -133,7 +129,12 @@ def test_summarize_genomes_handles_empty_input(monkeypatch):
 
     monkeypatch.setattr(analytics, "score_genome", fake_score_genome)
 
-    df = analytics.summarize_genomes([])
+    df = analytics.summarize_genomes(
+        [],
+        reference_sequence="A" * 2000,
+        reference_accession="NC_045512.2",
+    )
+
     assert isinstance(df, pd.DataFrame)
     assert len(df) == 0
 

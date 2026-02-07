@@ -1,6 +1,7 @@
 """
 xxxxxxxxxx
 """
+from ingest.scoring import score_genome
 
 def test_score_genome_sets_num_mutations_from_identified_mutations():
     from ingest.mutations import Mutation
@@ -120,3 +121,16 @@ def test_score_genome_includes_risk_explainability_fields():
     assert "S" in summary["risk_by_gene"]
     assert isinstance(summary["risk_explanation"], str)
     assert len(summary["risk_explanation"]) > 0
+
+def test_score_genome_uses_injected_reference_sequence_when_record_missing_reference():
+    record = {
+        "accession": "PX90_TEST",
+        "source": "genbank",
+        "sequence": "AGGT",
+    }
+    reference_sequence = "ACGT"
+
+    out = score_genome(record, reference_sequence=reference_sequence)
+
+    assert out["num_mutations"] == 1
+    assert out["risk_score"] > 0

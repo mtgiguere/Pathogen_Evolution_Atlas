@@ -69,6 +69,14 @@ def score_genome(
     map_genes = map_genes or _map_genes
     compute_risk = compute_risk or _compute_risk
 
+    # Inject reference_sequence if provided and the record doesn't already carry it.
+    if reference_sequence:
+        if isinstance(record, dict):
+            record.setdefault("reference_sequence", reference_sequence)
+        else:
+            if getattr(record, "reference_sequence", None) is None:
+                setattr(record, "reference_sequence", reference_sequence)
+
     mutations = identify_mutations(record)
     genes_affected = map_genes(mutations)
 

@@ -16,11 +16,20 @@ st.set_page_config(page_title="Pathogen Evolution Atlas", layout="wide")
 st.title("🧬 Pathogen Evolution Atlas")
 
 # --- Load data ---
-ref_rec = next(iter(load_ndjson("data/reference/reference.ndjson")))
-ref_seq = ref_rec["sequence"]
+ref_rec = next(iter(load_ndjson("data/reference/genbank_reference.ndjson")))
+
+ref_seq = ref_rec["sequence"] if isinstance(ref_rec, dict) else ref_rec.sequence
+ref_acc = ref_rec["accession"] if isinstance(ref_rec, dict) else ref_rec.accession
+
+
 
 records = load_ndjson("data/raw/genomes.ndjson")
-df = summarize_genomes(records, reference_sequence=ref_seq, reference_accession=ref_rec["accession"])
+df = summarize_genomes(
+    records,
+    reference_sequence=ref_seq,
+    reference_accession=ref_rec.accession,
+)
+
 
 # Make sure "date" behaves like a date for charts
 if "date" in df.columns:
