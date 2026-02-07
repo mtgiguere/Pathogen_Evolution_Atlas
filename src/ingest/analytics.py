@@ -15,23 +15,24 @@ Convert genome records into an analytics-ready DataFrame.
 """
 Convert genome records into an analytics-ready DataFrame.
 """
-def summarize_genomes(records: Iterable[dict]) -> pd.DataFrame:
+def summarize_genomes(
+    records: Iterable[dict],
+    *,
+    reference_sequence: str,
+    reference_accession: str = "NC_045512.2",
+) -> pd.DataFrame:
     records = list(records)
+
+    if not reference_sequence:
+        raise ValueError("reference_sequence must be provided explicitly")
+
+    ref_seq = reference_sequence
+
 
     def _get(rec, key, default=None):
         if isinstance(rec, dict):
             return rec.get(key, default)
         return getattr(rec, key, default)
-
-    # Prefer NC_045512 if present; otherwise fall back to the longest sequence available.
-    ref_rec = next(
-        (r for r in records if str(_get(r, "accession", "")).startswith("NC_045512")),
-        None,
-    )
-    if ref_rec is None:
-        ref_rec = max(records, key=lambda r: len(_get(r, "sequence") or ""), default=None)
-
-    ref_seq = _get(ref_rec, "sequence") if ref_rec is not None else None
 
     rows: list[dict] = []
     for r in records:
@@ -105,6 +106,8 @@ def summarize_genomes(records: Iterable[dict]) -> pd.DataFrame:
                 "genes_affected_count": len(set(genes_list)),
                 "mutations": mutations_list,
                 "mutations_str": muts_str,
+                "reference_accession": reference_accession,
+                "reference_length": len(ref_seq),
             }
         )
 

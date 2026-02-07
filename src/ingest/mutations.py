@@ -20,16 +20,16 @@ def diff_sequences(ref: str, sample: str) -> list[Mutation]:
     # Real-world sequences are often trimmed/partial.
     # For v1, diff only the overlapping region.
     L = min(len(ref), len(sample))
-    ref = ref[:L]
-    sample = sample[:L]
+    ref = ref[:L].upper()
+    sample = sample[:L].upper()
 
-    # if len(ref) != len(sample):
-    #     raise ValueError("Sequences must be the same length")
+    # Only treat strict A/C/G/T as comparable; skip everything else (N, gaps, IUPAC ambiguity)
+    VALID = {"A", "C", "G", "T"}
 
     mutations: list[Mutation] = []
 
     for i, (r, s) in enumerate(zip(ref, sample, strict=True), start=1):
-        if r.upper() == "N" or s.upper() == "N":
+        if r not in VALID or s not in VALID:
             continue
         if r != s:
             mutations.append(Mutation(pos=i, ref=r, alt=s, gene=gene_for_position(i)))

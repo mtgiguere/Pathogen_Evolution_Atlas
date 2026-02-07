@@ -45,3 +45,9 @@ def test_diff_sequences_mutations_include_gene():
     muts = diff_sequences(ref, sample)
 
     assert muts == [Mutation(pos=21563, ref="C", alt="G", gene="S")]
+
+def test_diff_sequences_ignores_ambiguous_and_gap_bases():
+    ref = "ACGTACGT"
+    sample = "ACNT-RYS"  # N, gap, and IUPAC ambiguity codes should be ignored
+    muts = diff_sequences(ref, sample)
+    assert muts == []

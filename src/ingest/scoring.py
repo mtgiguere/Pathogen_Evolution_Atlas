@@ -10,16 +10,6 @@ from typing import Any
 from ingest.mutations import Mutation, diff_sequences
 from ingest.risk import score_mutations
 
-
-def _identify_mutations(record: Any):
-    """
-    Identify mutations for either:
-      - dict-like records (record["sequence"], record["reference_sequence"])
-      - CanonicalGenomeRecord dataclasses (record.sequence, record.reference_sequence)
-
-    If sequence or reference is missing, return [].
-    """
-    # Dict-like path
 def _identify_mutations(record: Any):
     # Dict-like path
     if isinstance(record, dict):
@@ -77,7 +67,7 @@ def score_genome(
 ) -> dict[str, Any]:
     identify_mutations = identify_mutations or _identify_mutations
     map_genes = map_genes or _map_genes
-    compute_risk = compute_risk or score_mutations
+    compute_risk = compute_risk or _compute_risk
 
     mutations = identify_mutations(record)
     genes_affected = map_genes(mutations)
