@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pathogen Evolution Atlas - Mutation Map</title>
+</head>
+<body>
+<h1>Pathogen Evolution Atlas</h1>
+<h2>Interactive Mutation Map</h2>
+<div id="mutation-chart"></div>
+
+<script>
+// Create the mutation chart
+const chartDiv = document.getElementById('mutation-chart');   
+// Load real mutation data from JSON file
+fetch('mutation_data.json')
+    .then(response => response.json())
+    .then(data => {
+        alert('Step 1 - Raw JSON risk_analysis exists: ' + (data.risk_analysis !== undefined));
+        alert('Step 2 - Raw JSON risk_analysis content: ' + JSON.stringify(data.risk_analysis));
+
+
+        const mutations = data.mutations;
+        const riskAnalysis = data.risk_analysis;
+
+        alert('Step 3 - After assignment, riskAnalysis: ' + JSON.stringify(riskAnalysis));
+
+        // Create visualization with real data
+        displayMutations(mutations, riskAnalysis);
+    })
+    .catch(error => {
+        console.error('Error loading mutation data:', error);
+        //Fallback to sample data if file not found
+        const mutations = [
+            { position: 1000, gene: 'ORF1ab', type: 'A->G' },
+            { position: 22000, gene: 'S', type: 'C->T' },
+            { position: 29000, gene: 'N', type: 'T->C'}
+        ];
+        displayMutations(mutations, null);
+    });
+function displayMutations(mutations, riskAnalysis) {
+    // Display risk analysis if available
+    let html = '';
+    if (riskAnalysis) {
+        html += '<div style="background-color: #f0f0f0; padding: 10px; margin-bottom: 20px;">';
+        html += '<h3>Risk Analysis</h3>';
+        html += '<p><strong>Risk Level:</strong> ' + riskAnalysis.level + ' (Score: ' + riskAnalysis.score + ')</p>';
+        html += '<p><strong>Explanation:</strong> ' + riskAnalysis.explanation + '</p>';
+        html += '</div>';
+    }
+
+    // Display mutations
+    html += '<h3>Detected Mutations:</h3>';
+    mutations.forEach(function(mutation) {
+        html += '<p style="cursor: pointer; color: green;" onclick="showMutationDetails(' + mutation.position + ',\'' + mutation.gene + '\', \'' + mutation.type + '\')">Position ' + mutation.position + ' (' + mutation.gene +'): ' + mutation.type + '</p>';
+    });    
+    chartDiv.innerHTML = html;
+}
+function showMutationDetails(position, gene, type) {
+alert('Mutation Details:\nPosition: ' + position + '\nGene: ' + gene + '\nType: ' + type);
+}
+</script>
+</body>
+</html>

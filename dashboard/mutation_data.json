@@ -1,0 +1,43 @@
+{
+  "mutations": [
+    {
+      "position": 1000,
+      "gene": "ORF1ab",
+      "type": "A->G",
+      "ref": "A",
+      "alt": "G"
+    },
+    {
+      "position": 22000,
+      "gene": "S",
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
+    },
+    {
+      "position": 29000,
+      "gene": "N",
+      "type": "T->C",
+      "ref": "T",
+      "alt": "C"
+    }
+  ],
+  "risk_analysis": {
+    "score": 5,
+    "by_gene": {
+      "ORF1ab": 1,
+      "S": 1,
+      "N": 1
+    },
+    "level": "Moderate",
+    "explanation": "Moderate risk driven mostly by Spike (1 mutations; weight 3)."
+  },
+  "summary": {
+    "total_mutations": 3,
+    "genes_affected": [
+      "ORF1ab",
+      "S",
+      "N"
+    ]
+  }
+}
