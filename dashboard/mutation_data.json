@@ -1,18 +1,144 @@
 {
   "mutations": [
     {
-      "position": 1000,
+      "position": 3037,
       "gene": "ORF1ab",
-      "type": "A->G",
-      "ref": "A",
-      "alt": "G"
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
     },
     {
-      "position": 22000,
+      "position": 8782,
+      "gene": "ORF1ab",
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
+    },
+    {
+      "position": 11083,
+      "gene": "ORF1ab",
+      "type": "G->T",
+      "ref": "G",
+      "alt": "T"
+    },
+    {
+      "position": 14408,
+      "gene": "ORF1ab",
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
+    },
+    {
+      "position": 15324,
+      "gene": "ORF1ab",
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
+    },
+    {
+      "position": 21762,
       "gene": "S",
       "type": "C->T",
       "ref": "C",
       "alt": "T"
+    },
+    {
+      "position": 21765,
+      "gene": "S",
+      "type": "A->T",
+      "ref": "A",
+      "alt": "T"
+    },
+    {
+      "position": 22578,
+      "gene": "S",
+      "type": "G->A",
+      "ref": "G",
+      "alt": "A"
+    },
+    {
+      "position": 22995,
+      "gene": "S",
+      "type": "C->A",
+      "ref": "C",
+      "alt": "A"
+    },
+    {
+      "position": 23063,
+      "gene": "S",
+      "type": "A->T",
+      "ref": "A",
+      "alt": "T"
+    },
+    {
+      "position": 23271,
+      "gene": "S",
+      "type": "A->T",
+      "ref": "A",
+      "alt": "T"
+    },
+    {
+      "position": 25563,
+      "gene": "ORF3a",
+      "type": "G->T",
+      "ref": "G",
+      "alt": "T"
+    },
+    {
+      "position": 25904,
+      "gene": "ORF3a",
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
+    },
+    {
+      "position": 26340,
+      "gene": "E",
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
+    },
+    {
+      "position": 26735,
+      "gene": "M",
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
+    },
+    {
+      "position": 27259,
+      "gene": "ORF6",
+      "type": "A->T",
+      "ref": "A",
+      "alt": "T"
+    },
+    {
+      "position": 27638,
+      "gene": "ORF7a",
+      "type": "T->C",
+      "ref": "T",
+      "alt": "C"
+    },
+    {
+      "position": 28144,
+      "gene": "ORF8",
+      "type": "T->C",
+      "ref": "T",
+      "alt": "C"
+    },
+    {
+      "position": 28311,
+      "gene": "N",
+      "type": "C->T",
+      "ref": "C",
+      "alt": "T"
+    },
+    {
+      "position": 28881,
+      "gene": "N",
+      "type": "G->A",
+      "ref": "G",
+      "alt": "A"
     },
     {
       "position": 29000,
@@ -20,24 +146,223 @@
       "type": "T->C",
       "ref": "T",
       "alt": "C"
+    },
+    {
+      "position": 29645,
+      "gene": "ORF10",
+      "type": "G->T",
+      "ref": "G",
+      "alt": "T"
+    }
+  ],
+  "locations": [
+    {
+      "country": "China",
+      "city": "Wuhan",
+      "lat": 30.5928,
+      "lng": 114.3055,
+      "collection_date": "2020-01-05",
+      "position": 3037
+    },
+    {
+      "country": "Italy",
+      "city": "Milan",
+      "lat": 45.4642,
+      "lng": 9.19,
+      "collection_date": "2020-02-20",
+      "position": 8782
+    },
+    {
+      "country": "Spain",
+      "city": "Madrid",
+      "lat": 40.4168,
+      "lng": -3.7038,
+      "collection_date": "2020-03-15",
+      "position": 11083
+    },
+    {
+      "country": "United States",
+      "city": "Seattle",
+      "lat": 47.6062,
+      "lng": -122.3321,
+      "collection_date": "2020-02-29",
+      "position": 14408
+    },
+    {
+      "country": "France",
+      "city": "Paris",
+      "lat": 48.8566,
+      "lng": 2.3522,
+      "collection_date": "2020-03-01",
+      "position": 15324
+    },
+    {
+      "country": "South Africa",
+      "city": "Pretoria",
+      "lat": -25.7479,
+      "lng": 28.2293,
+      "collection_date": "2021-11-15",
+      "position": 21762
+    },
+    {
+      "country": "United Kingdom",
+      "city": "London",
+      "lat": 51.5074,
+      "lng": -0.1278,
+      "collection_date": "2020-12-18",
+      "position": 21765
+    },
+    {
+      "country": "Botswana",
+      "city": "Gaborone",
+      "lat": -24.6282,
+      "lng": 25.9231,
+      "collection_date": "2021-11-18",
+      "position": 22578
+    },
+    {
+      "country": "India",
+      "city": "Mumbai",
+      "lat": 19.076,
+      "lng": 72.8777,
+      "collection_date": "2021-02-10",
+      "position": 22995
+    },
+    {
+      "country": "United Kingdom",
+      "city": "London",
+      "lat": 51.5074,
+      "lng": -0.1278,
+      "collection_date": "2020-12-15",
+      "position": 23063
+    },
+    {
+      "country": "Netherlands",
+      "city": "Amsterdam",
+      "lat": 52.3676,
+      "lng": 4.9041,
+      "collection_date": "2021-12-01",
+      "position": 23271
+    },
+    {
+      "country": "Brazil",
+      "city": "S\u00e3o Paulo",
+      "lat": -23.5558,
+      "lng": -46.6396,
+      "collection_date": "2020-04-15",
+      "position": 25563
+    },
+    {
+      "country": "Australia",
+      "city": "Sydney",
+      "lat": -33.8688,
+      "lng": 151.2093,
+      "collection_date": "2020-03-20",
+      "position": 25904
+    },
+    {
+      "country": "South Korea",
+      "city": "Seoul",
+      "lat": 37.5665,
+      "lng": 126.978,
+      "collection_date": "2020-02-18",
+      "position": 26340
+    },
+    {
+      "country": "Canada",
+      "city": "Toronto",
+      "lat": 43.6532,
+      "lng": -79.3832,
+      "collection_date": "2020-03-12",
+      "position": 26735
+    },
+    {
+      "country": "Japan",
+      "city": "Tokyo",
+      "lat": 35.6762,
+      "lng": 139.6503,
+      "collection_date": "2020-02-25",
+      "position": 27259
+    },
+    {
+      "country": "Singapore",
+      "city": "Singapore",
+      "lat": 1.3521,
+      "lng": 103.8198,
+      "collection_date": "2020-02-08",
+      "position": 27638
+    },
+    {
+      "country": "Thailand",
+      "city": "Bangkok",
+      "lat": 13.7563,
+      "lng": 100.5018,
+      "collection_date": "2020-01-25",
+      "position": 28144
+    },
+    {
+      "country": "Germany",
+      "city": "Berlin",
+      "lat": 52.52,
+      "lng": 13.405,
+      "collection_date": "2020-03-08",
+      "position": 28311
+    },
+    {
+      "country": "Iran",
+      "city": "Tehran",
+      "lat": 35.6892,
+      "lng": 51.389,
+      "collection_date": "2020-02-28",
+      "position": 28881
+    },
+    {
+      "country": "Netherlands",
+      "city": "Amsterdam",
+      "lat": 52.3676,
+      "lng": 4.9041,
+      "collection_date": "2020-03-18",
+      "position": 29000
+    },
+    {
+      "country": "Mexico",
+      "city": "Mexico City",
+      "lat": 19.4326,
+      "lng": -99.1332,
+      "collection_date": "2020-03-25",
+      "position": 29645
     }
   ],
   "risk_analysis": {
-    "score": 5,
+    "score": 26,
     "by_gene": {
-      "ORF1ab": 1,
-      "S": 1,
-      "N": 1
+      "ORF1ab": 5,
+      "S": 6,
+      "ORF3a": 2,
+      "E": 1,
+      "M": 1,
+      "ORF6": 1,
+      "ORF7a": 1,
+      "ORF8": 1,
+      "N": 3,
+      "ORF10": 1
     },
-    "level": "Moderate",
-    "explanation": "Moderate risk driven mostly by Spike (1 mutations; weight 3)."
+    "level": "High",
+    "explanation": "High risk driven mostly by Spike (6 mutations; weight 3)."
   },
   "summary": {
-    "total_mutations": 3,
+    "total_mutations": 22,
     "genes_affected": [
       "ORF1ab",
       "S",
-      "N"
+      "ORF3a",
+      "E",
+      "M",
+      "ORF6",
+      "ORF7a",
+      "ORF8",
+      "N",
+      "ORF10"
     ]
   }
 }

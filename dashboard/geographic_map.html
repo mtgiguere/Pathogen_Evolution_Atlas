@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pathogen Evolution Atlas - Geographic Map</title>
+<style> 
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 500px; width: 100%; }
+    .info-panel { padding: 20px; background: #f5f5f5; }
+</style>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+<div class="info-panel">
+    <h1>Pathogen Evolution Atlas</h1>
+    <h2>Geographic Mutation Spread</h2>
+    <div id="summary"></div>
+</div>
+<div id="map"></div>
+
+
+<script>
+// Initialize the map
+const map = L.map('map').setView([51.5074, -0.1278], 2); // Center on London, zoom level 2
+
+// Add tile layer (the actual map)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Load mutation location data
+fetch('mutation_data.json')
+    .then(response => response.json())
+    .then(data => {
+        displayMutationsOnMap(data.locations, data.mutations);
+    })
+    .catch(error => {
+        console.error('Error loading data:', error);
+    });
+function displayMutationsOnMap(locations, mutations) {
+    // Create a summary
+    document.getElementById('summary').innerHTML =
+        `<p><strong>Tracking ${locations.length} mutation locations</strong></p>`;
+
+    // Add markers for each location
+    locations.forEach(location => {
+        // Find the corresponding mutation
+        const mutation = mutations.find(m => m.position === location.position);
+
+        // Create marker color based on gene
+        let markerColor = 'blue';
+        if (mutation && mutation.gene === 'S') markerColor = 'red';         // Spike = red
+        if (mutation && mutation.gene === 'ORF1ab') markerColor = 'green';  // ORF1ab = green
+        if (mutation && mutation.gene === 'N') markerColor = 'orange';      // N = orange
+
+        // Create marker
+        const marker = L.circleMarker([location.lat, location.lng], {
+            radius: 8,
+            fillColor: markerColor,
+            color: '#000',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map);
+
+        // Add popup with mutation details
+        marker.bindPopup(`
+            <strong>${location.city}, ${location.country}</strong><br>
+            Position: ${location.position}<br>
+            Gene: ${mutation ? mutation.gene : 'Unknown'}<br>
+            Mutation: ${mutation ? mutation.type : 'Unknown'}<br>
+            Collection Date: ${location.collection_date}
+            `);
+    });
+}
+</script>
+</body>
+</html>
