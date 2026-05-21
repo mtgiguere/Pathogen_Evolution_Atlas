@@ -393,3 +393,55 @@ if len(filtered):
         st.write(row.get("risk_explanation", ""))
 else:
     st.info("Nothing to show. Try widening filters or enabling 'Include unscored'.")
+
+# --- Methods ---
+with st.expander("How it works", expanded=False):
+    st.markdown("""
+### Data source
+Genome sequences are fetched from **NCBI GenBank** via the Entrez API.
+The reference genome is **NC_045512.2** (Wuhan-Hu-1, 29,903 nt).
+
+### Mutation detection
+Each genome is compared to the reference using a pairwise nucleotide diff.
+Only unambiguous bases (A/C/G/T) are compared — positions containing N or
+IUPAC ambiguity codes are skipped.
+
+**QC filters applied before scoring:**
+- Sequence must overlap ≥ 80% of the reference length
+- N-base fraction must be < 10%
+- Non-ACGT fraction must be < 2%
+
+### Gene annotation
+Mutations are mapped to 11 structural genes using NC_045512.2 coordinates.
+ORF1ab is further resolved to 15 non-structural proteins (nsp1–nsp16).
+Spike is annotated to functional subdomains (NTD, RBD, fusion peptide,
+HR1, HR2).
+
+### Risk scoring
+A gene-weighted score aggregates mutations across genes, with Spike
+mutations carrying the highest weight (immune evasion potential).
+Scores are classified as **Low / Moderate / High**.
+
+### Growth rate estimation
+Sequences are binned by ISO week and lineage.
+A **log-linear model** is fit per lineage: ln(count) ~ week_index.
+- Slope > 0.05 /week → **Growing** (≈ 5% weekly increase threshold)
+- Slope < −0.05 /week → **Declining**
+- Otherwise → **Stable**
+
+R² is reported as a goodness-of-fit metric.
+Lineages with fewer than 3 weekly observations are excluded.
+
+### Variant frequency forecast
+Frequencies are projected forward using exponential growth:
+
+> **count(t) = last\_count × exp(growth\_rate × t)**
+
+where *t* is weeks from the last observed data point.
+Projected counts are normalised across all lineages each week so
+frequencies always sum to 1.0.
+Lineages with no valid growth rate are excluded from the forecast.
+
+---
+*Pipeline source: [github.com/mtgiguere/Pathogen_Evolution_Atlas](https://github.com/mtgiguere/Pathogen_Evolution_Atlas)*
+    """)
