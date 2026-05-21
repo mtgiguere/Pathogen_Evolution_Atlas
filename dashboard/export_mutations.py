@@ -13,9 +13,7 @@ def create_sample_data():
         {"pos": 22000, "ref": "C", "alt": "T", "gene": "S"},
         {"pos": 29000, "ref": "T", "alt": "C", "gene": "N"},
     ]
-    return [
-        Mutation(pos=m["pos"], ref=m["ref"], alt=m["alt"], gene=m["gene"]) for m in mutations_data
-    ]
+    return [Mutation(pos=m["pos"], ref=m["ref"], alt=m["alt"], gene=m["gene"]) for m in mutations_data]
 
 
 def export_mutation_data():
