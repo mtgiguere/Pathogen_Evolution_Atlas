@@ -23,7 +23,7 @@ class EscapeMutation:
     aa_pos: int
     ref_aa: str
     alt_aa: str
-    mechanism: str                          # "antibody_escape" | "vaccine_reduced_neutralization" | "antiviral_resistance"
+    mechanism: str  # "antibody_escape" | "vaccine_reduced_neutralization" | "antiviral_resistance"
     antibodies_affected: list[str] = field(default_factory=list)
     notes: str = ""
 

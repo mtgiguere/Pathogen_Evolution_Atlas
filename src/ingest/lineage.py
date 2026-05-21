@@ -19,22 +19,70 @@ from .mutations import Mutation
 # ── Standard genetic code (NCBI codon table 1) ────────────────────────────────
 
 _CODON_TABLE: dict[str, str] = {
-    "TTT": "F", "TTC": "F", "TTA": "L", "TTG": "L",
-    "CTT": "L", "CTC": "L", "CTA": "L", "CTG": "L",
-    "ATT": "I", "ATC": "I", "ATA": "I", "ATG": "M",
-    "GTT": "V", "GTC": "V", "GTA": "V", "GTG": "V",
-    "TCT": "S", "TCC": "S", "TCA": "S", "TCG": "S",
-    "CCT": "P", "CCC": "P", "CCA": "P", "CCG": "P",
-    "ACT": "T", "ACC": "T", "ACA": "T", "ACG": "T",
-    "GCT": "A", "GCC": "A", "GCA": "A", "GCG": "A",
-    "TAT": "Y", "TAC": "Y", "TAA": "*", "TAG": "*",
-    "CAT": "H", "CAC": "H", "CAA": "Q", "CAG": "Q",
-    "AAT": "N", "AAC": "N", "AAA": "K", "AAG": "K",
-    "GAT": "D", "GAC": "D", "GAA": "E", "GAG": "E",
-    "TGT": "C", "TGC": "C", "TGA": "*", "TGG": "W",
-    "CGT": "R", "CGC": "R", "CGA": "R", "CGG": "R",
-    "AGT": "S", "AGC": "S", "AGA": "R", "AGG": "R",
-    "GGT": "G", "GGC": "G", "GGA": "G", "GGG": "G",
+    "TTT": "F",
+    "TTC": "F",
+    "TTA": "L",
+    "TTG": "L",
+    "CTT": "L",
+    "CTC": "L",
+    "CTA": "L",
+    "CTG": "L",
+    "ATT": "I",
+    "ATC": "I",
+    "ATA": "I",
+    "ATG": "M",
+    "GTT": "V",
+    "GTC": "V",
+    "GTA": "V",
+    "GTG": "V",
+    "TCT": "S",
+    "TCC": "S",
+    "TCA": "S",
+    "TCG": "S",
+    "CCT": "P",
+    "CCC": "P",
+    "CCA": "P",
+    "CCG": "P",
+    "ACT": "T",
+    "ACC": "T",
+    "ACA": "T",
+    "ACG": "T",
+    "GCT": "A",
+    "GCC": "A",
+    "GCA": "A",
+    "GCG": "A",
+    "TAT": "Y",
+    "TAC": "Y",
+    "TAA": "*",
+    "TAG": "*",
+    "CAT": "H",
+    "CAC": "H",
+    "CAA": "Q",
+    "CAG": "Q",
+    "AAT": "N",
+    "AAC": "N",
+    "AAA": "K",
+    "AAG": "K",
+    "GAT": "D",
+    "GAC": "D",
+    "GAA": "E",
+    "GAG": "E",
+    "TGT": "C",
+    "TGC": "C",
+    "TGA": "*",
+    "TGG": "W",
+    "CGT": "R",
+    "CGC": "R",
+    "CGA": "R",
+    "CGG": "R",
+    "AGT": "S",
+    "AGC": "S",
+    "AGA": "R",
+    "AGG": "R",
+    "GGT": "G",
+    "GGC": "G",
+    "GGA": "G",
+    "GGG": "G",
 }
 
 # 1-based start position of each gene's first nucleotide (NC_045512.2)
@@ -59,30 +107,30 @@ _GENE_STARTS: dict[str, int] = {
 @dataclass(frozen=True)
 class AminoAcidMutation:
     gene: str
-    aa_pos: int          # 1-based amino-acid position within the gene
-    ref_aa: str          # single-letter reference amino acid
-    alt_aa: str          # single-letter mutant amino acid
-    nt_pos: int = 0      # originating nucleotide position (0 = unknown)
+    aa_pos: int  # 1-based amino-acid position within the gene
+    ref_aa: str  # single-letter reference amino acid
+    alt_aa: str  # single-letter mutant amino acid
+    nt_pos: int = 0  # originating nucleotide position (0 = unknown)
     subgene: str | None = None
 
 
 @dataclass(frozen=True)
 class LineageSignature:
-    name: str                                   # Pango name, e.g. "B.1.617.2"
-    display_name: str                           # human-readable, e.g. "Delta"
-    who_label: str                              # WHO Greek letter or "" if none
-    who_class: str                              # "VOC", "VOI", "VBM", "former", ""
-    min_hit_fraction: float                     # minimum fraction to assign this lineage
+    name: str  # Pango name, e.g. "B.1.617.2"
+    display_name: str  # human-readable, e.g. "Delta"
+    who_label: str  # WHO Greek letter or "" if none
+    who_class: str  # "VOC", "VOI", "VBM", "former", ""
+    min_hit_fraction: float  # minimum fraction to assign this lineage
     defining_mutations: list[AminoAcidMutation] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
 class LineageCall:
-    lineage: str            # Pango name or "Unknown"
+    lineage: str  # Pango name or "Unknown"
     display_name: str
     who_label: str
     who_class: str
-    confidence: float       # fraction of defining mutations observed
+    confidence: float  # fraction of defining mutations observed
     supporting_mutations: list[AminoAcidMutation] = field(default_factory=list)
     missing_mutations: list[AminoAcidMutation] = field(default_factory=list)
 
@@ -113,11 +161,11 @@ def translate_mutation(mutation: Mutation, reference_sequence: str) -> AminoAcid
         return None
 
     gene_start = _GENE_STARTS[mutation.gene]
-    offset = mutation.pos - gene_start          # 0-based offset within the CDS
+    offset = mutation.pos - gene_start  # 0-based offset within the CDS
     if offset < 0:
         return None
 
-    aa_pos = offset // 3 + 1                    # 1-based amino-acid position
+    aa_pos = offset // 3 + 1  # 1-based amino-acid position
     codon_start_0 = gene_start - 1 + (aa_pos - 1) * 3  # 0-based index into ref string
 
     ref_str = reference_sequence.upper()
@@ -201,8 +249,13 @@ class LineageClassifier:
             if confidence < sig.min_hit_fraction:
                 continue
 
-            if best is None or confidence > best.confidence or (
-                confidence == best.confidence and len(supporting) > len(best.supporting_mutations)
+            if (
+                best is None
+                or confidence > best.confidence
+                or (
+                    confidence == best.confidence
+                    and len(supporting) > len(best.supporting_mutations)
+                )
             ):
                 best = LineageCall(
                     lineage=sig.name,

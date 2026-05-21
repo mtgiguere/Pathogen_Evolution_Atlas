@@ -46,9 +46,9 @@ def test_default_sars_cov2_config_has_genes():
 def test_default_sars_cov2_config_has_subgenes():
     cfg = get_default_sars_cov2_config()
     subnames = {g.name for g in cfg.subgenes}
-    assert "nsp5" in subnames   # Paxlovid target
+    assert "nsp5" in subnames  # Paxlovid target
     assert "nsp12" in subnames  # RdRp
-    assert "RBD" in subnames    # Spike receptor-binding domain
+    assert "RBD" in subnames  # Spike receptor-binding domain
 
 
 def test_default_sars_cov2_config_has_gene_weights():
@@ -95,9 +95,9 @@ def test_gene_for_position_config_basic():
 
 def test_gene_for_position_config_intergenic():
     cfg = _minimal_config([(100, 500, "GeneA"), (600, 900, "GeneB")])
-    assert gene_for_position_config(50, cfg) is None    # before first
-    assert gene_for_position_config(550, cfg) is None   # gap between genes
-    assert gene_for_position_config(950, cfg) is None   # after last
+    assert gene_for_position_config(50, cfg) is None  # before first
+    assert gene_for_position_config(550, cfg) is None  # gap between genes
+    assert gene_for_position_config(950, cfg) is None  # after last
 
 
 def test_gene_for_position_config_empty_genes():
@@ -226,6 +226,6 @@ def test_influenza_h3n2_config_loadable():
     cfg = load_config(path)
     assert cfg.pathogen_id == "influenza-h3n2"
     names = {g.name for g in cfg.genes}
-    assert "HA" in names   # haemagglutinin — primary immune target
-    assert "NA" in names   # neuraminidase — Tamiflu target
+    assert "HA" in names  # haemagglutinin — primary immune target
+    assert "NA" in names  # neuraminidase — Tamiflu target
     assert cfg.gene_weights.get("HA", 0) >= 2

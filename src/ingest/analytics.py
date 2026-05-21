@@ -116,7 +116,9 @@ def summarize_genomes(
                 if classifier is not None:
                     lineage_call = classifier.classify(mutations_list)
                 if escape_catalogue:
-                    esc_matches = escape_from_nt_mutations(mutations_list, ref_seq, escape_catalogue)
+                    esc_matches = escape_from_nt_mutations(
+                        mutations_list, ref_seq, escape_catalogue
+                    )
             else:
                 reasons = list(s.get("qc_reasons", []) or [])
                 skip_reason = "qc_fail: " + ", ".join(reasons) if reasons else "qc_fail"

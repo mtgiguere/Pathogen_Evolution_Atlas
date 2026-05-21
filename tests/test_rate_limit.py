@@ -70,7 +70,4 @@ def test_rate_limiter_logs_sleep(monkeypatch, caplog):
         genbank._rate_limit()  # first call — no sleep
         genbank._rate_limit()  # second at same instant — sleeps and logs
 
-    assert any(
-        "sleep" in r.message.lower() or "rate" in r.message.lower()
-        for r in caplog.records
-    )
+    assert any("sleep" in r.message.lower() or "rate" in r.message.lower() for r in caplog.records)

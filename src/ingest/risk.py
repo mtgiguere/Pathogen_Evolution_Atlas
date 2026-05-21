@@ -15,17 +15,17 @@ from .mutations import Mutation
 # ORF3a/E/ORF6/ORF8=2: virulence and immune-evasion factors.
 # Remaining structural genes=1: important but lower direct immune pressure.
 _GENE_WEIGHTS: dict[str, int] = {
-    "S": 3,       # Spike — primary antibody target
-    "ORF3a": 2,   # viroporin — virulence, apoptosis
-    "E": 2,       # envelope — virulence, ion channel
-    "ORF6": 2,    # IFN antagonist — interferon evasion
-    "ORF8": 2,    # MHC-I downregulation — immune evasion
+    "S": 3,  # Spike — primary antibody target
+    "ORF3a": 2,  # viroporin — virulence, apoptosis
+    "E": 2,  # envelope — virulence, ion channel
+    "ORF6": 2,  # IFN antagonist — interferon evasion
+    "ORF8": 2,  # MHC-I downregulation — immune evasion
     "ORF1ab": 1,  # polyprotein (NSPs 1-16)
-    "M": 1,       # membrane — structural assembly
-    "N": 1,       # nucleocapsid — structural
-    "ORF7a": 1,   # immune modulation
-    "ORF7b": 1,   # minor accessory
-    "ORF10": 1,   # minor / uncertain expression
+    "M": 1,  # membrane — structural assembly
+    "N": 1,  # nucleocapsid — structural
+    "ORF7a": 1,  # immune modulation
+    "ORF7b": 1,  # minor accessory
+    "ORF10": 1,  # minor / uncertain expression
 }
 
 # Simple label thresholds (v1)

@@ -28,7 +28,7 @@ _STRUCTURAL_GENES: list[tuple[int, int, str]] = [
 _NSPS: list[tuple[int, int, str]] = [
     (266, 805, "nsp1"),
     (806, 2719, "nsp2"),
-    (2720, 8554, "nsp3"),    # papain-like protease
+    (2720, 8554, "nsp3"),  # papain-like protease
     (8555, 10054, "nsp4"),
     (10055, 10972, "nsp5"),  # 3CLpro/Mpro — Paxlovid/nirmatrelvir target
     (10973, 11842, "nsp6"),
@@ -49,7 +49,7 @@ _NSPS: list[tuple[int, int, str]] = [
 _SPIKE_DOMAINS: list[tuple[int, int, str]] = [
     (21599, 22477, "NTD"),  # N-terminal domain (aa 13-305)
     (22517, 23185, "RBD"),  # receptor-binding domain (aa 319-541)
-    (24008, 24061, "FP"),   # fusion peptide (aa 816-833)
+    (24008, 24061, "FP"),  # fusion peptide (aa 816-833)
     (24296, 24514, "HR1"),  # heptad repeat 1 (aa 912-984)
     (25049, 25201, "HR2"),  # heptad repeat 2 (aa 1163-1213)
 ]

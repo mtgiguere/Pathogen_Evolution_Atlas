@@ -29,9 +29,9 @@ def test_aggregate_by_week_empty():
 
 def test_aggregate_by_week_single_lineage():
     df = _df(
-        ("Delta", "2021-10-04"),   # 2021-W40
-        ("Delta", "2021-10-05"),   # 2021-W40
-        ("Delta", "2021-10-11"),   # 2021-W41
+        ("Delta", "2021-10-04"),  # 2021-W40
+        ("Delta", "2021-10-05"),  # 2021-W40
+        ("Delta", "2021-10-11"),  # 2021-W41
     )
     result = aggregate_by_week(df)
     assert len(result) == 2
@@ -45,16 +45,16 @@ def test_aggregate_by_week_single_lineage():
 
 def test_aggregate_by_week_multiple_lineages():
     df = _df(
-        ("Delta", "2021-10-04"),   # 2021-W40
-        ("BA.2",  "2021-10-04"),   # 2021-W40
-        ("BA.2",  "2021-10-05"),   # 2021-W40
+        ("Delta", "2021-10-04"),  # 2021-W40
+        ("BA.2", "2021-10-04"),  # 2021-W40
+        ("BA.2", "2021-10-05"),  # 2021-W40
     )
     result = aggregate_by_week(df)
     assert len(result) == 2  # Delta×W40, BA.2×W40
     total_delta = result[result["lineage"] == "Delta"].iloc[0]["total"]
-    total_ba2   = result[result["lineage"] == "BA.2"].iloc[0]["total"]
-    assert total_delta == 3   # both share the same week total
-    assert total_ba2   == 3
+    total_ba2 = result[result["lineage"] == "BA.2"].iloc[0]["total"]
+    assert total_delta == 3  # both share the same week total
+    assert total_ba2 == 3
     freq_delta = result[result["lineage"] == "Delta"].iloc[0]["frequency"]
     assert freq_delta == pytest.approx(1 / 3)
 
@@ -140,7 +140,7 @@ def test_estimate_growth_rates_insufficient_data():
 
 def test_estimate_growth_rates_multiple_variants():
     growing = _weekly("Delta", WEEKS_4, [1, 2, 4, 8])
-    declining = _weekly("BA.2",  WEEKS_4, [8, 4, 2, 1])
+    declining = _weekly("BA.2", WEEKS_4, [8, 4, 2, 1])
     df = pd.concat([growing, declining], ignore_index=True)
     result = estimate_growth_rates(df)
     assert len(result) == 2
@@ -184,5 +184,10 @@ def test_estimate_growth_rates_output_columns():
     df = _weekly("Delta", WEEKS_4, [1, 2, 4, 8])
     result = estimate_growth_rates(df)
     assert set(result.columns) >= {
-        "lineage", "growth_rate", "doubling_time_days", "r_squared", "n_timepoints", "trend"
+        "lineage",
+        "growth_rate",
+        "doubling_time_days",
+        "r_squared",
+        "n_timepoints",
+        "trend",
     }

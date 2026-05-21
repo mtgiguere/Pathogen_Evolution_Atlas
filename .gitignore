@@ -13,6 +13,7 @@ __pycache__/
 
 # Package build / egg-info
 *.egg-info/
+**/*.egg-info/
 dist/
 build/
 *.egg
