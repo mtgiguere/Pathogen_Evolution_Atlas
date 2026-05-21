@@ -22,9 +22,7 @@ OUT_PATH = Path("data/raw/genomes.enriched.ndjson")
 
 def main() -> None:
     if not EMAIL:
-        raise RuntimeError(
-            "NCBI_EMAIL environment variable is required for Entrez access."
-        )
+        raise RuntimeError("NCBI_EMAIL environment variable is required for Entrez access.")
 
     if not IN_PATH.exists():
         raise FileNotFoundError(f"Input file not found: {IN_PATH}")

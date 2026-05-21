@@ -1,6 +1,5 @@
-from ingest.geography_enrichment import enrich_location_from_biosample
-from ingest.geography_enrichment import enrich_many_locations
-from ingest.models import CanonicalGenomeRecord
+from src.ingest.geography_enrichment import enrich_location_from_biosample, enrich_many_locations
+from src.ingest.models import CanonicalGenomeRecord
 
 
 def test_enrich_location_noop_if_country_present(mocker):
@@ -23,7 +22,7 @@ def test_enrich_location_noop_if_country_present(mocker):
 
 def test_enrich_location_uses_biosample_when_missing(mocker):
     mocker.patch(
-        "ingest.geography_enrichment._fetch_biosample_geo_loc",
+        "src.ingest.geography_enrichment._fetch_biosample_geo_loc",
         return_value="USA: California",
     )
 
@@ -46,7 +45,7 @@ def test_enrich_location_uses_biosample_when_missing(mocker):
 
 def test_enrich_location_no_biosample_data(mocker):
     mocker.patch(
-        "ingest.geography_enrichment._fetch_biosample_geo_loc",
+        "src.ingest.geography_enrichment._fetch_biosample_geo_loc",
         return_value=None,
     )
 
@@ -69,7 +68,7 @@ def test_enrich_location_no_biosample_data(mocker):
 
 def test_enrich_many_locations_mixed_records(mocker):
     mocker.patch(
-        "ingest.geography_enrichment._fetch_biosample_geo_loc",
+        "src.ingest.geography_enrichment._fetch_biosample_geo_loc",
         return_value="USA: California",
     )
 

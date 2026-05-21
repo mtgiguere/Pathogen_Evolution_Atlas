@@ -1,0 +1,81 @@
+[
+  {
+    "name": "B.1.617.2",
+    "display_name": "Delta",
+    "who_label": "Delta",
+    "who_class": "VOC",
+    "min_hit_fraction": 0.6,
+    "defining_mutations": [
+      {"gene": "S", "aa_pos": 19,  "ref_aa": "T", "alt_aa": "R"},
+      {"gene": "S", "aa_pos": 452, "ref_aa": "L", "alt_aa": "R"},
+      {"gene": "S", "aa_pos": 478, "ref_aa": "T", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 681, "ref_aa": "P", "alt_aa": "R"},
+      {"gene": "S", "aa_pos": 614, "ref_aa": "D", "alt_aa": "G"}
+    ]
+  },
+  {
+    "name": "BA.2",
+    "display_name": "Omicron BA.2",
+    "who_label": "Omicron",
+    "who_class": "VOC",
+    "min_hit_fraction": 0.6,
+    "defining_mutations": [
+      {"gene": "S", "aa_pos": 19,  "ref_aa": "T", "alt_aa": "I"},
+      {"gene": "S", "aa_pos": 440, "ref_aa": "N", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 477, "ref_aa": "S", "alt_aa": "N"},
+      {"gene": "S", "aa_pos": 478, "ref_aa": "T", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 484, "ref_aa": "E", "alt_aa": "A"},
+      {"gene": "S", "aa_pos": 501, "ref_aa": "N", "alt_aa": "Y"},
+      {"gene": "S", "aa_pos": 614, "ref_aa": "D", "alt_aa": "G"},
+      {"gene": "S", "aa_pos": 655, "ref_aa": "H", "alt_aa": "Y"},
+      {"gene": "S", "aa_pos": 679, "ref_aa": "N", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 681, "ref_aa": "P", "alt_aa": "H"}
+    ]
+  },
+  {
+    "name": "BA.5",
+    "display_name": "Omicron BA.5",
+    "who_label": "Omicron",
+    "who_class": "VOC",
+    "min_hit_fraction": 0.6,
+    "defining_mutations": [
+      {"gene": "S", "aa_pos": 440, "ref_aa": "N", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 452, "ref_aa": "L", "alt_aa": "R"},
+      {"gene": "S", "aa_pos": 486, "ref_aa": "F", "alt_aa": "V"},
+      {"gene": "S", "aa_pos": 614, "ref_aa": "D", "alt_aa": "G"},
+      {"gene": "S", "aa_pos": 655, "ref_aa": "H", "alt_aa": "Y"},
+      {"gene": "S", "aa_pos": 679, "ref_aa": "N", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 681, "ref_aa": "P", "alt_aa": "H"}
+    ]
+  },
+  {
+    "name": "XBB.1.5",
+    "display_name": "Omicron XBB.1.5 (Kraken)",
+    "who_label": "Omicron",
+    "who_class": "VOC",
+    "min_hit_fraction": 0.6,
+    "defining_mutations": [
+      {"gene": "S", "aa_pos": 440, "ref_aa": "N", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 486, "ref_aa": "F", "alt_aa": "P"},
+      {"gene": "S", "aa_pos": 614, "ref_aa": "D", "alt_aa": "G"},
+      {"gene": "S", "aa_pos": 655, "ref_aa": "H", "alt_aa": "Y"},
+      {"gene": "S", "aa_pos": 679, "ref_aa": "N", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 681, "ref_aa": "P", "alt_aa": "H"}
+    ]
+  },
+  {
+    "name": "JN.1",
+    "display_name": "Omicron JN.1",
+    "who_label": "Omicron",
+    "who_class": "VOC",
+    "min_hit_fraction": 0.6,
+    "defining_mutations": [
+      {"gene": "S", "aa_pos": 440, "ref_aa": "N", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 456, "ref_aa": "F", "alt_aa": "L"},
+      {"gene": "S", "aa_pos": 614, "ref_aa": "D", "alt_aa": "G"},
+      {"gene": "S", "aa_pos": 655, "ref_aa": "H", "alt_aa": "Y"},
+      {"gene": "S", "aa_pos": 679, "ref_aa": "N", "alt_aa": "K"},
+      {"gene": "S", "aa_pos": 681, "ref_aa": "P", "alt_aa": "H"}
+    ]
+  }
+]

@@ -1,0 +1,101 @@
+[
+  {
+    "gene": "S",
+    "aa_pos": 484,
+    "ref_aa": "E",
+    "alt_aa": "K",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["Bamlanivimab", "REGN10933", "LY-CoV555", "CT-P59"],
+    "notes": "Major class 2 escape; reduces neutralization by convalescent sera and some vaccines. Found in Beta (B.1.351) and Gamma (P.1)."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 484,
+    "ref_aa": "E",
+    "alt_aa": "A",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["Bamlanivimab", "LY-CoV016", "REGN10933"],
+    "notes": "Omicron BA.2/BA.4/BA.5 class 2 antibody escape; similar profile to E484K."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 417,
+    "ref_aa": "K",
+    "alt_aa": "N",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["REGN10933", "LY-CoV016", "CB6"],
+    "notes": "Class 1 antibody escape. Found in Beta (B.1.351). Disrupts class 1 mAb binding site."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 417,
+    "ref_aa": "K",
+    "alt_aa": "T",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["REGN10933", "LY-CoV016"],
+    "notes": "Class 1 antibody escape. Found in Gamma (P.1). Similar escape profile to K417N."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 452,
+    "ref_aa": "L",
+    "alt_aa": "R",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["Bamlanivimab", "BRII-196", "LY-CoV555"],
+    "notes": "Reduces binding of class 2/3 mAbs. Delta and BA.4/BA.5 signature. Also increases ACE2 affinity."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 501,
+    "ref_aa": "N",
+    "alt_aa": "Y",
+    "mechanism": "vaccine_reduced_neutralization",
+    "antibodies_affected": [],
+    "notes": "Increases ACE2 affinity. Modestly reduces polyclonal serum neutralization from some vaccines (Alpha, Beta, Gamma, Omicron)."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 346,
+    "ref_aa": "R",
+    "alt_aa": "T",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["Tixagevimab", "Cilgavimab", "Evusheld"],
+    "notes": "Reduces Evusheld (tixagevimab+cilgavimab) neutralization. Emerged in BQ.1.1 and XBB sublineages."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 444,
+    "ref_aa": "K",
+    "alt_aa": "T",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["Bebtelovimab", "Sotrovimab"],
+    "notes": "Escapes last clinically authorized mAbs (bebtelovimab, sotrovimab). Found in BQ.1.1."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 486,
+    "ref_aa": "F",
+    "alt_aa": "P",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["S309", "VIR-7831", "Sotrovimab"],
+    "notes": "XBB.1.5 signature. Restores ACE2 binding lost by F486V; potent class 3 antibody escape."
+  },
+  {
+    "gene": "S",
+    "aa_pos": 486,
+    "ref_aa": "F",
+    "alt_aa": "V",
+    "mechanism": "antibody_escape",
+    "antibodies_affected": ["S309", "Sotrovimab"],
+    "notes": "BA.4/BA.5 signature. Class 3 antibody escape; partially reduces ACE2 affinity (compensated by L452R)."
+  },
+  {
+    "gene": "nsp5",
+    "aa_pos": 132,
+    "ref_aa": "P",
+    "alt_aa": "H",
+    "mechanism": "antiviral_resistance",
+    "antibodies_affected": [],
+    "notes": "3CL protease (Mpro) mutation. Does not directly reduce Paxlovid (nirmatrelvir) binding but observed in Omicron background; monitored for resistance emergence."
+  }
+]

@@ -24,7 +24,8 @@ def write_ndjson(records: Iterable[CanonicalGenomeRecord], out_path: str | Path)
         for rec in records:
             # dataclasses have __dict__ but we want stable JSON
             f.write(json.dumps(rec.__dict__, default=str) + "\n")
-            
+
+
 def load_ndjson(path: str | Path) -> list[CanonicalGenomeRecord]:
     """
     Load canonical records from an NDJSON file (one JSON object per line).

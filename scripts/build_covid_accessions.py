@@ -12,7 +12,7 @@ def build_query(min_len: int, max_len: int) -> str:
     return (
         '"Severe acute respiratory syndrome coronavirus 2"[Organism] '
         'AND "complete genome"[Title] '
-        f'AND {min_len}:{max_len}[SLEN]'
+        f"AND {min_len}:{max_len}[SLEN]"
     )
 
 
@@ -47,8 +47,12 @@ def write_accessions(accessions: list[str], out_path: str | Path) -> None:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Build a SARS-CoV-2 complete-genome accession list from NCBI.")
-    ap.add_argument("--out", default="data/accessions/covid_accessions.txt", help="Output .txt path")
+    ap = argparse.ArgumentParser(
+        description="Build a SARS-CoV-2 complete-genome accession list from NCBI."
+    )
+    ap.add_argument(
+        "--out", default="data/accessions/covid_accessions.txt", help="Output .txt path"
+    )
     ap.add_argument("--n", type=int, default=300, help="How many accessions to write")
     ap.add_argument("--min-len", type=int, default=29000, help="Minimum sequence length (bp)")
     ap.add_argument("--max-len", type=int, default=31000, help="Maximum sequence length (bp)")

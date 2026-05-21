@@ -1,16 +1,15 @@
-"""
-xxxxxxxxxx
-"""
-from ingest.scoring import score_genome
-from ingest.mutations import qc_compare_to_reference
+import logging
 
-def qc_lenient(ref, sample):
+from src.ingest.mutations import QCResult, qc_compare_to_reference
+from src.ingest.scoring import score_genome
+
+
+def qc_lenient(ref, sample, **kw):
     return qc_compare_to_reference(ref, sample, min_overlap=1)
 
 
 def test_score_genome_sets_num_mutations_from_identified_mutations():
-    from ingest.mutations import Mutation
-    from ingest.scoring import score_genome
+    from src.ingest.mutations import Mutation
 
     canonical_record = {
         "accession": "TEST0002",
@@ -32,13 +31,11 @@ def test_score_genome_sets_num_mutations_from_identified_mutations():
         identify_mutations=identify,
     )
 
-
     assert summary["num_mutations"] == 3
 
 
 def test_score_genome_sets_genes_affected_from_gene_mapping():
-    from ingest.mutations import Mutation
-    from ingest.scoring import score_genome
+    from src.ingest.mutations import Mutation
 
     canonical_record = {
         "accession": "TEST0003",
@@ -63,13 +60,11 @@ def test_score_genome_sets_genes_affected_from_gene_mapping():
         map_genes=map_genes,
     )
 
-
     assert summary["genes_affected"] == ["Spike", "N"]
 
 
 def test_score_genome_sets_risk_score_from_risk_model():
-    from ingest.mutations import Mutation
-    from ingest.scoring import score_genome
+    from src.ingest.mutations import Mutation
 
     canonical_record = {
         "accession": "TEST0004",
@@ -95,10 +90,8 @@ def test_score_genome_sets_risk_score_from_risk_model():
 
 
 def test_score_genome_computes_real_risk_score_from_mutations():
-    # This one uses the REAL risk model, but still injects mutations to avoid diffing.
-    from ingest.mutations import Mutation
-    from ingest.risk import score_mutations
-    from ingest.scoring import score_genome
+    from src.ingest.mutations import Mutation
+    from src.ingest.risk import score_mutations
 
     canonical_record = {
         "accession": "TEST2000",
@@ -116,13 +109,11 @@ def test_score_genome_computes_real_risk_score_from_mutations():
         identify_mutations=identify,
     )
 
-
     assert summary["risk_score"] == float(score_mutations(identify(canonical_record))["score"])
 
 
 def test_score_genome_includes_risk_explainability_fields():
-    from ingest.mutations import Mutation
-    from ingest.scoring import score_genome
+    from src.ingest.mutations import Mutation
 
     canonical_record = {
         "accession": "TEST3000",
@@ -148,6 +139,7 @@ def test_score_genome_includes_risk_explainability_fields():
     assert "S" in summary["risk_by_gene"]
     assert isinstance(summary["risk_explanation"], str)
     assert len(summary["risk_explanation"]) > 0
+
 
 def test_score_genome_uses_injected_reference_sequence_when_record_missing_reference():
     record = {
@@ -180,7 +172,7 @@ def test_score_genome_blocks_high_N_fraction():
     out = score_genome(
         record,
         reference_sequence=ref,
-        qc_fn=lambda r, s: qc_compare_to_reference(r, s, min_overlap=1, max_n_fraction=0.10),
+        qc_fn=lambda r, s, **kw: qc_compare_to_reference(r, s, min_overlap=1, max_n_fraction=0.10),
     )
 
     assert out["scorable"] is False
@@ -188,3 +180,39 @@ def test_score_genome_blocks_high_N_fraction():
     assert "HIGH_N_FRACTION" in out["qc_reasons"]
     assert out["risk_level"] == "N/A"
     assert out["risk_score"] is None
+
+
+def test_score_genome_qc_fail_logs_warning(caplog):
+    """A QC failure must emit a WARNING log containing the accession."""
+    with caplog.at_level(logging.WARNING):
+        result = score_genome(
+            {"accession": "QC_FAIL_TEST", "source": "test", "sequence": "A" * 50},
+            reference_sequence="A" * 100,
+        )
+
+    assert result["scorable"] is False
+    assert any("QC_FAIL_TEST" in r.message for r in caplog.records)
+
+
+def test_score_genome_success_logs_debug(caplog):
+    """A successful score must emit a DEBUG log containing the accession."""
+
+    def _qc_pass(ref, sample, *, min_overlap=0, **kw):
+        return QCResult(
+            status="PASS",
+            reasons=[],
+            overlap_len=4,
+            n_fraction=0.0,
+            non_acgt_fraction=0.0,
+        )
+
+    with caplog.at_level(logging.DEBUG):
+        result = score_genome(
+            {"accession": "SCORED_TEST", "source": "test", "sequence": "ACGT"},
+            reference_sequence="ACGT",
+            qc_fn=_qc_pass,
+            identify_mutations=lambda _: [],
+        )
+
+    assert result["scorable"] is True
+    assert any("SCORED_TEST" in r.message for r in caplog.records)

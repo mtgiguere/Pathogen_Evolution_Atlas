@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import replace
-from typing import Optional, Iterable, List
 from xml.etree import ElementTree as ET
 
 from Bio import Entrez
 
-from .models import CanonicalGenomeRecord
 from .genbank import parse_location
+from .models import CanonicalGenomeRecord
+
 
 def enrich_location_from_biosample(
     record: CanonicalGenomeRecord,
@@ -23,7 +24,8 @@ def enrich_location_from_biosample(
     country, region = parse_location(geo)
     return replace(record, country=country, region=region)
 
-def _fetch_biosample_geo_loc(accession: str, email: str) -> Optional[str]:
+
+def _fetch_biosample_geo_loc(accession: str, email: str) -> str | None:
     """
     Try to enrich geography via:
       nuccore accession -> elink to biosample -> efetch biosample XML -> find geo_loc_name
@@ -77,11 +79,12 @@ def _fetch_biosample_geo_loc(accession: str, email: str) -> Optional[str]:
 
     return None
 
+
 def enrich_many_locations(
     records: Iterable[CanonicalGenomeRecord],
     email: str,
-) -> List[CanonicalGenomeRecord]:
-    enriched: List[CanonicalGenomeRecord] = []
+) -> list[CanonicalGenomeRecord]:
+    enriched: list[CanonicalGenomeRecord] = []
     for r in records:
         if r.country:
             enriched.append(r)

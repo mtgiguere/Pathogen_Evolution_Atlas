@@ -17,3 +17,13 @@ def test_count_mutations_by_gene_basic():
         "S": 1,
         "N": 1,
     }
+
+
+def test_count_mutations_new_structural_genes():
+    muts = [
+        Mutation(pos=1, ref="A", alt="G", gene="ORF3a"),
+        Mutation(pos=2, ref="C", alt="T", gene="E"),
+        Mutation(pos=3, ref="G", alt="A", gene="ORF6"),
+    ]
+    counts = count_mutations_by_gene(muts)
+    assert counts == {"ORF3a": 1, "E": 1, "ORF6": 1}

@@ -1,6 +1,7 @@
 """
 summary.py
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -28,11 +29,3 @@ def summarize_records(records: list[CanonicalGenomeRecord]) -> dict[str, Any]:
         "max_collection_date": max_date,
         "pct_missing_country": pct_missing_country,
     }
-
-def test_summarize_records_empty():
-    summary = summarize_records([])
-
-    assert summary["count"] == 0
-    assert summary["min_collection_date"] is None
-    assert summary["max_collection_date"] is None
-    assert summary["pct_missing_country"] == 0.0

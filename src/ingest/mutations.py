@@ -1,11 +1,12 @@
 """
 mutations.py
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .genes import gene_for_position
+from .genes import gene_for_position, subgene_for_position
 
 
 @dataclass(frozen=True)
@@ -14,6 +15,7 @@ class Mutation:
     ref: str
     alt: str
     gene: str | None = None
+    subgene: str | None = None  # NSP within ORF1ab, or Spike domain (RBD, NTD, etc.)
 
 
 def diff_sequences(ref: str, sample: str) -> list[Mutation]:
@@ -32,9 +34,18 @@ def diff_sequences(ref: str, sample: str) -> list[Mutation]:
         if r not in VALID or s not in VALID:
             continue
         if r != s:
-            mutations.append(Mutation(pos=i, ref=r, alt=s, gene=gene_for_position(i)))
+            mutations.append(
+                Mutation(
+                    pos=i,
+                    ref=r,
+                    alt=s,
+                    gene=gene_for_position(i),
+                    subgene=subgene_for_position(i),
+                )
+            )
 
     return mutations
+
 
 @dataclass(frozen=True)
 class QCResult:
@@ -70,7 +81,6 @@ def qc_compare_to_reference(
             non_acgt_fraction=0.0,
         )
 
-    ref_olap = ref[:L].upper()
     sample_olap = sample[:L].upper()
 
     n_count = sum(1 for b in sample_olap if b == "N")

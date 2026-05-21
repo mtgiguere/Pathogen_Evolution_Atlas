@@ -35,6 +35,7 @@ def test_fetch_many_returns_one_dict_per_accession(monkeypatch):
     assert [r["accession"] for r in out] == accessions
     assert len(out) == 3
 
+
 def test_normalize_many_returns_canonical_records(monkeypatch):
     """
     Batch normalization should return CanonicalGenomeRecord objects,
@@ -58,6 +59,7 @@ def test_normalize_many_returns_canonical_records(monkeypatch):
     assert len(out) == 2
     assert out[0].accession == "A1"
     assert out[1].accession == "A2"
+
 
 def test_fetch_and_normalize_many_chains_both(monkeypatch):
     """

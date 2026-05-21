@@ -1,62 +1,52 @@
 from __future__ import annotations
-import pytest
+
+import logging
+
 import pandas as pd
+import pytest
 
 
 def test_summarize_genomes_marks_scorable_and_skip_reasons(monkeypatch):
-    import ingest.analytics as analytics
+    import src.ingest.analytics as analytics
 
-    # Stub scoring so this test focuses on analytics behavior.
     def fake_score_genome(rec):
         return {
             "accession": rec["accession"],
             "source": rec.get("source", "genbank"),
+            "scorable": True,
+            "qc_status": "PASS",
+            "qc_reasons": [],
             "num_mutations": 2,
             "genes_affected": ["Spike", "N"],
             "risk_score": 3.0,
             "risk_level": "Moderate",
             "risk_explanation": "Moderate risk driven mostly by Spike.",
+            "risk_by_gene": {},
         }
 
     monkeypatch.setattr(analytics, "score_genome", fake_score_genome)
 
-    # Use long toy sequences so we don't trip the "too_short" gate.
-    ref_seq = "A" * 2000
-
-    # Use long toy sequences so we don't trip the "too_short" gate.
     reference_sequence = "A" * 2000
     reference_accession = "NC_045512.2"
 
     records = [
-        # Scorable record (long enough + has sequence)
         {
             "accession": "SAMPLE_FULL",
             "source": "genbank",
             "sequence": "A" * 2000,
             "collection_date": "2020-01-01",
         },
-        # Missing sequence
         {
             "accession": "SAMPLE_MISSING_SEQ",
             "source": "genbank",
             "sequence": "",
         },
-        # Too short (should be blocked)
         {
             "accession": "SAMPLE_TOO_SHORT",
             "source": "genbank",
             "sequence": "A" * 10,
         },
     ]
-
-    reference_sequence = "A" * 2000
-    reference_accession = "NC_045512.2"
-    df = analytics.summarize_genomes(
-        records,
-        reference_sequence=reference_sequence,
-        reference_accession=reference_accession,
-    )
-
 
     df = analytics.summarize_genomes(
         records,
@@ -66,7 +56,6 @@ def test_summarize_genomes_marks_scorable_and_skip_reasons(monkeypatch):
 
     assert isinstance(df, pd.DataFrame)
 
-    # Required columns (adjust only if you renamed in analytics.py)
     expected_cols = {
         "accession",
         "source",
@@ -84,7 +73,6 @@ def test_summarize_genomes_marks_scorable_and_skip_reasons(monkeypatch):
     }
     assert expected_cols.issubset(set(df.columns))
 
-    # Scorable record checks
     row_full = df.loc[df["accession"] == "SAMPLE_FULL"].iloc[0]
     assert bool(row_full["scorable"]) is True
     assert row_full["skip_reason"] == ""
@@ -92,14 +80,12 @@ def test_summarize_genomes_marks_scorable_and_skip_reasons(monkeypatch):
     assert row_full["risk_score"] == 3.0
     assert isinstance(row_full["genes_affected"], str) and "Spike" in row_full["genes_affected"]
 
-    # Missing sequence checks
     row_missing = df.loc[df["accession"] == "SAMPLE_MISSING_SEQ"].iloc[0]
     assert bool(row_missing["scorable"]) is False
     assert row_missing["skip_reason"] == "missing_sequence"
     assert row_missing["risk_level"] == "N/A"
     assert "Not scored:" in row_missing["risk_explanation"]
 
-    # Too short checks
     row_short = df.loc[df["accession"] == "SAMPLE_TOO_SHORT"].iloc[0]
     assert bool(row_short["scorable"]) is False
     assert row_short["skip_reason"].startswith("too_short")
@@ -107,7 +93,7 @@ def test_summarize_genomes_marks_scorable_and_skip_reasons(monkeypatch):
 
 
 def test_summarize_genomes_requires_reference_sequence(monkeypatch):
-    import ingest.analytics as analytics
+    import src.ingest.analytics as analytics
 
     def fake_score_genome(rec):
         return {"accession": rec["accession"]}
@@ -117,13 +103,12 @@ def test_summarize_genomes_requires_reference_sequence(monkeypatch):
     records = [{"accession": "PX1", "source": "genbank", "sequence": "A" * 2000}]
 
     with pytest.raises(TypeError):
-        analytics.summarize_genomes(records)  # missing required kw-only args
+        analytics.summarize_genomes(records)
 
 
 def test_summarize_genomes_handles_empty_input(monkeypatch):
-    import ingest.analytics as analytics
+    import src.ingest.analytics as analytics
 
-    # Stub just in case, though it shouldn't be called.
     def fake_score_genome(_rec):
         raise AssertionError("score_genome should not be called for empty input")
 
@@ -138,6 +123,45 @@ def test_summarize_genomes_handles_empty_input(monkeypatch):
     assert isinstance(df, pd.DataFrame)
     assert len(df) == 0
 
-    # If analytics returns empty DF with no columns, that's acceptable for now.
-    # If you update analytics to always include columns, this will still pass.
-    # (We don't assert df["scorable"] here to avoid KeyError.)
+
+def test_summarize_genomes_logs_pre_scoring_skip(caplog):
+    """Records that fail the pre-scoring gate must be logged at DEBUG."""
+    import src.ingest.analytics as analytics
+
+    with caplog.at_level(logging.DEBUG):
+        analytics.summarize_genomes(
+            [{"accession": "SHORT_REC", "sequence": "A" * 10}],
+            reference_sequence="A" * 2000,
+        )
+
+    assert any("SHORT_REC" in r.message for r in caplog.records)
+
+
+def test_summarize_genomes_logs_batch_summary(monkeypatch, caplog):
+    """summarize_genomes must emit an INFO-level batch summary at the end."""
+    import src.ingest.analytics as analytics
+
+    def fake_score(rec):
+        return {
+            "accession": rec["accession"],
+            "source": "genbank",
+            "scorable": True,
+            "qc_status": "PASS",
+            "qc_reasons": [],
+            "num_mutations": 0,
+            "genes_affected": [],
+            "risk_score": 0.0,
+            "risk_level": "Low",
+            "risk_explanation": "ok",
+            "risk_by_gene": {},
+        }
+
+    monkeypatch.setattr(analytics, "score_genome", fake_score)
+
+    with caplog.at_level(logging.INFO):
+        analytics.summarize_genomes(
+            [{"accession": "A1", "sequence": "A" * 2000}],
+            reference_sequence="A" * 2000,
+        )
+
+    assert any(r.levelno == logging.INFO for r in caplog.records)

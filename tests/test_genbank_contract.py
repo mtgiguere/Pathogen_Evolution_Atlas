@@ -1,6 +1,7 @@
 """
 Unit Tests models.py
 """
+
 from datetime import date
 
 import pytest
@@ -29,6 +30,7 @@ def test_normalize_genbank_minimal_happy_path():
     assert rec.sequence_length == 8
     assert rec.source == "genbank"
 
+
 def test_normalize_requires_accession_and_organism():
     """
     accession and organism are required for our canonical contract.
@@ -36,6 +38,7 @@ def test_normalize_requires_accession_and_organism():
     """
     with pytest.raises(ValueError):
         normalize_genbank_minimal({"sequence": "ACGT"})
+
 
 def test_normalize_missing_optional_fields():
     """
