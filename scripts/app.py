@@ -1,3 +1,4 @@
+import math
 import os
 from datetime import datetime as _dt
 from pathlib import Path
@@ -49,10 +50,10 @@ def _week_to_date(week_str: str) -> pd.Timestamp:
 def compute_trajectories(genome_df: pd.DataFrame, n_forecast_weeks: int = 8):
     weekly = aggregate_by_week(genome_df)
     if weekly.empty:
-        return pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     rates = estimate_growth_rates(weekly)
     forecast = forecast_variant_frequencies(weekly, rates, n_weeks=n_forecast_weeks)
-    return weekly, forecast
+    return weekly, rates, forecast
 
 # Make sure "date" behaves like a date for charts
 if "date" in df.columns:
@@ -89,6 +90,53 @@ c2.metric("Avg Risk", round(avg_risk, 2))
 
 unique_genes = int(filtered["genes_affected"].nunique()) if len(filtered) else 0
 c3.metric("Unique Genes", unique_genes)
+
+# --- Threat Monitor ---
+st.subheader("Threat Monitor")
+
+if "lineage" in df.columns and "collection_date" in df.columns:
+    _weekly_threat, rates_df, _fcast_threat = compute_trajectories(df)
+
+    if not rates_df.empty:
+        growing = rates_df[rates_df["trend"] == "Growing"].dropna(subset=["doubling_time_days"])
+
+        if not growing.empty:
+            top = growing.nsmallest(1, "doubling_time_days").iloc[0]
+            dt = float(top["doubling_time_days"])
+            lineage = top["lineage"]
+            rate = float(top["growth_rate"])
+            r2 = float(top["r_squared"])
+            n_pts = int(top["n_timepoints"])
+            weekly_pct = (math.exp(rate) - 1) * 100
+
+            severity = "🔴 CRITICAL" if dt < 7 else "🟠 HIGH" if dt < 14 else "🟡 MODERATE"
+            alert_fn = st.error if dt < 7 else st.warning
+
+            alert_fn(
+                f"**{severity} — {lineage}**  \n"
+                f"Doubling every **{dt:.1f} days** · "
+                f"+{weekly_pct:.0f}% per week · "
+                f"R² = {r2:.2f} ({n_pts} weeks of data)"
+            )
+
+            if len(growing) > 1:
+                table = (
+                    growing.nsmallest(6, "doubling_time_days")[
+                        ["lineage", "doubling_time_days", "growth_rate", "r_squared", "n_timepoints"]
+                    ]
+                    .rename(columns={
+                        "lineage": "Lineage",
+                        "doubling_time_days": "Doubling (days)",
+                        "growth_rate": "Growth rate",
+                        "r_squared": "R²",
+                        "n_timepoints": "Weeks of data",
+                    })
+                )
+                st.dataframe(table, use_container_width=True, hide_index=True)
+        else:
+            st.success("✅ No fast-growing variants detected in current data.")
+    else:
+        st.info("Not enough data for threat analysis.")
 
 # --- Quick visuals ---
 st.subheader("Overview")
@@ -127,7 +175,7 @@ with colB:
 st.subheader("Variant Frequency Trajectories")
 
 if "lineage" in df.columns and "collection_date" in df.columns:
-    weekly_df, forecast_df = compute_trajectories(df)
+    weekly_df, _rates, forecast_df = compute_trajectories(df)
 
     if not weekly_df.empty:
         top_lineages = (
