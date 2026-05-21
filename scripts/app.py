@@ -18,20 +18,21 @@ st.title("🧬 Pathogen Evolution Atlas")
 # --- Load data ---
 for p in (_REF_PATH, _GENOMES_PATH):
     if not p.exists():
-        st.error(f"Data file not found: {p}. Set REF_PATH / GENOMES_PATH env vars or run the ingest scripts first.")
+        st.error(
+            f"Data file not found: {p}. Set REF_PATH / GENOMES_PATH env vars or run the ingest scripts first."
+        )
         st.stop()
 
-ref_rec = next(iter(load_ndjson(_REF_PATH)))
+@st.cache_data
+def load_data(ref_path: Path, genomes_path: Path) -> pd.DataFrame:
+    ref_rec = next(iter(load_ndjson(ref_path)))
+    ref_seq = ref_rec["sequence"] if isinstance(ref_rec, dict) else ref_rec.sequence
+    ref_acc = ref_rec["accession"] if isinstance(ref_rec, dict) else ref_rec.accession
+    records = list(load_ndjson(genomes_path))
+    return summarize_genomes(records, reference_sequence=ref_seq, reference_accession=ref_acc)
 
-ref_seq = ref_rec["sequence"] if isinstance(ref_rec, dict) else ref_rec.sequence
-ref_acc = ref_rec["accession"] if isinstance(ref_rec, dict) else ref_rec.accession
 
-records = list(load_ndjson(_GENOMES_PATH))
-df = summarize_genomes(
-    records,
-    reference_sequence=ref_seq,
-    reference_accession=ref_acc,
-)
+df = load_data(_REF_PATH, _GENOMES_PATH)
 
 # Make sure "date" behaves like a date for charts
 if "date" in df.columns:
