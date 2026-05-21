@@ -15,14 +15,8 @@ const chartDiv = document.getElementById('mutation-chart');
 fetch('mutation_data.json')
     .then(response => response.json())
     .then(data => {
-        alert('Step 1 - Raw JSON risk_analysis exists: ' + (data.risk_analysis !== undefined));
-        alert('Step 2 - Raw JSON risk_analysis content: ' + JSON.stringify(data.risk_analysis));
-
-
         const mutations = data.mutations;
         const riskAnalysis = data.risk_analysis;
-
-        alert('Step 3 - After assignment, riskAnalysis: ' + JSON.stringify(riskAnalysis));
 
         // Create visualization with real data
         displayMutations(mutations, riskAnalysis);
