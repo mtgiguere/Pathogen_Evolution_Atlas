@@ -65,9 +65,7 @@ def test_save_state_creates_parent_dirs(tmp_path):
 
 def test_load_state_partial_json():
     """A file with only some fields set should not crash; missing fields fall back to defaults."""
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
         json.dump({"total_fetched": 7}, f)
         tmp = Path(f.name)
 
@@ -159,7 +157,7 @@ def test_run_incremental_ingest_deduplicates_existing():
         fetch_fn=lambda a: [_make_raw(x) for x in a],
         existing_accessions=existing,
     )
-    assert result.new_count == 1    # only ACC003 is new
+    assert result.new_count == 1  # only ACC003 is new
     assert result.skipped_count == 2
 
 

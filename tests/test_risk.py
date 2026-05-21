@@ -39,8 +39,17 @@ def test_score_mutations_level_and_explanation():
 def test_score_mutations_all_structural_genes_have_weight():
     """Every structural gene must have a positive weight."""
     structural_genes = {
-        "S", "ORF1ab", "N",
-        "ORF3a", "E", "M", "ORF6", "ORF7a", "ORF7b", "ORF8", "ORF10",
+        "S",
+        "ORF1ab",
+        "N",
+        "ORF3a",
+        "E",
+        "M",
+        "ORF6",
+        "ORF7a",
+        "ORF7b",
+        "ORF8",
+        "ORF10",
     }
     for gene in structural_genes:
         assert gene in _GENE_WEIGHTS, f"Missing weight for {gene}"

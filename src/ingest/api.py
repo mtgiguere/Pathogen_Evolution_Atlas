@@ -139,10 +139,7 @@ def list_variants(df: DataFrameDep) -> list[dict[str, Any]]:
         return []
 
     counts = (
-        df.groupby("lineage")
-        .size()
-        .reset_index(name="count")
-        .sort_values("count", ascending=False)
+        df.groupby("lineage").size().reset_index(name="count").sort_values("count", ascending=False)
     )
 
     result: list[dict[str, Any]] = []
@@ -150,13 +147,15 @@ def list_variants(df: DataFrameDep) -> list[dict[str, Any]]:
         lineage = row["lineage"]
         # Pull display name and WHO info from first matching genome row
         meta = df[df["lineage"] == lineage].iloc[0]
-        result.append({
-            "lineage": lineage,
-            "lineage_display": meta.get("lineage_display", lineage),
-            "who_label": meta.get("who_label", ""),
-            "who_class": meta.get("who_class", ""),
-            "count": int(row["count"]),
-        })
+        result.append(
+            {
+                "lineage": lineage,
+                "lineage_display": meta.get("lineage_display", lineage),
+                "who_label": meta.get("who_label", ""),
+                "who_class": meta.get("who_class", ""),
+                "count": int(row["count"]),
+            }
+        )
 
     return result
 

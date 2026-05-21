@@ -1,10 +1,14 @@
 import os
+from datetime import datetime as _dt
 from pathlib import Path
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
 from ingest.analytics import summarize_genomes
+from ingest.forecast import forecast_variant_frequencies
+from ingest.growth import aggregate_by_week, estimate_growth_rates
 from ingest.io import load_ndjson
 
 EMAIL = os.getenv("NCBI_EMAIL", "you@domain.com")
@@ -18,20 +22,37 @@ st.title("🧬 Pathogen Evolution Atlas")
 # --- Load data ---
 for p in (_REF_PATH, _GENOMES_PATH):
     if not p.exists():
-        st.error(f"Data file not found: {p}. Set REF_PATH / GENOMES_PATH env vars or run the ingest scripts first.")
+        st.error(
+            f"Data file not found: {p}. Set REF_PATH / GENOMES_PATH env vars or run the ingest scripts first."
+        )
         st.stop()
 
-ref_rec = next(iter(load_ndjson(_REF_PATH)))
 
-ref_seq = ref_rec["sequence"] if isinstance(ref_rec, dict) else ref_rec.sequence
-ref_acc = ref_rec["accession"] if isinstance(ref_rec, dict) else ref_rec.accession
+@st.cache_data
+def load_data(ref_path: Path, genomes_path: Path) -> pd.DataFrame:
+    ref_rec = next(iter(load_ndjson(ref_path)))
+    ref_seq = ref_rec["sequence"] if isinstance(ref_rec, dict) else ref_rec.sequence
+    ref_acc = ref_rec["accession"] if isinstance(ref_rec, dict) else ref_rec.accession
+    records = list(load_ndjson(genomes_path))
+    return summarize_genomes(records, reference_sequence=ref_seq, reference_accession=ref_acc)
 
-records = list(load_ndjson(_GENOMES_PATH))
-df = summarize_genomes(
-    records,
-    reference_sequence=ref_seq,
-    reference_accession=ref_acc,
-)
+
+df = load_data(_REF_PATH, _GENOMES_PATH)
+
+
+def _week_to_date(week_str: str) -> pd.Timestamp:
+    year, w = week_str.split("-W")
+    return pd.Timestamp(_dt.strptime(f"{year}-W{int(w):02d}-1", "%G-W%V-%u"))
+
+
+@st.cache_data
+def compute_trajectories(genome_df: pd.DataFrame, n_forecast_weeks: int = 8):
+    weekly = aggregate_by_week(genome_df)
+    if weekly.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    rates = estimate_growth_rates(weekly)
+    forecast = forecast_variant_frequencies(weekly, rates, n_weeks=n_forecast_weeks)
+    return weekly, forecast
 
 # Make sure "date" behaves like a date for charts
 if "date" in df.columns:
@@ -101,6 +122,82 @@ with colB:
         st.line_chart(trend)
     else:
         st.info("No valid dates available for a time trend yet.")
+
+# --- Variant Frequency Trajectories ---
+st.subheader("Variant Frequency Trajectories")
+
+if "lineage" in df.columns and "collection_date" in df.columns:
+    weekly_df, forecast_df = compute_trajectories(df)
+
+    if not weekly_df.empty:
+        top_lineages = (
+            weekly_df[weekly_df["lineage"] != "Unknown"]
+            .groupby("lineage")["count"]
+            .sum()
+            .nlargest(8)
+            .index.tolist()
+        )
+
+        if top_lineages:
+            hist = weekly_df[weekly_df["lineage"].isin(top_lineages)].copy()
+            hist["date"] = hist["week"].apply(_week_to_date)
+
+            color_enc = alt.Color("lineage:N", legend=alt.Legend(title="Lineage"))
+
+            obs_chart = (
+                alt.Chart(hist)
+                .mark_line(point=True, strokeWidth=2)
+                .encode(
+                    x=alt.X("date:T", title="Week"),
+                    y=alt.Y("frequency:Q", title="Frequency", scale=alt.Scale(domain=[0, 1])),
+                    color=color_enc,
+                    tooltip=["lineage:N", "week:N", alt.Tooltip("frequency:Q", format=".1%")],
+                )
+            )
+
+            layers = [obs_chart]
+
+            if not forecast_df.empty:
+                fcast = forecast_df[forecast_df["lineage"].isin(top_lineages)].copy()
+                fcast["date"] = fcast["week"].apply(_week_to_date)
+
+                fcast_chart = (
+                    alt.Chart(fcast)
+                    .mark_line(strokeDash=[6, 3], strokeWidth=2)
+                    .encode(
+                        x=alt.X("date:T"),
+                        y=alt.Y("projected_frequency:Q"),
+                        color=color_enc,
+                        tooltip=[
+                            "lineage:N",
+                            "week:N",
+                            alt.Tooltip("projected_frequency:Q", format=".1%"),
+                        ],
+                    )
+                )
+
+                rule = (
+                    alt.Chart(pd.DataFrame({"date": [hist["date"].max()]}))
+                    .mark_rule(color="#888888", strokeDash=[4, 2], opacity=0.5)
+                    .encode(x="date:T")
+                )
+
+                layers.extend([fcast_chart, rule])
+
+            chart = (
+                alt.layer(*layers)
+                .properties(
+                    height=400,
+                    title="Solid = observed  ·  Dashed = 8-week forecast",
+                )
+                .interactive()
+            )
+
+            st.altair_chart(chart, use_container_width=True)
+        else:
+            st.info("Lineage classification unavailable — provide a signatures file to enable trajectories.")
+    else:
+        st.info("Not enough weekly data for trajectory analysis.")
 
 # --- Table ---
 st.subheader("Genome Summary")
