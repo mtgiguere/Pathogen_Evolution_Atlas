@@ -1,6 +1,7 @@
 """
 models.py
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,6 +16,7 @@ class CanonicalGenomeRecord:
     This is our project-wide contract: every upstream data source
     should be transformed into this shape before downstream processing.
     """
+
     accession: str
     organism: str
     collection_date: date | None

@@ -33,6 +33,7 @@ def test_fetch_and_normalize_one_accession():
     assert rec.source == "genbank"
     assert rec.sequence_length > 1000  # should be ~30k
 
+
 @pytest.mark.integration
 def test_genbank_fetch_respects_rate_limit(monkeypatch):
     """
@@ -47,6 +48,7 @@ def test_genbank_fetch_respects_rate_limit(monkeypatch):
 
     # Patch Entrez.efetch so we can observe timing
     from src.ingest import genbank
+
     original_efetch = genbank.Entrez.efetch
     monkeypatch.setattr(genbank.Entrez, "efetch", fake_efetch)
 

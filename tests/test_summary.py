@@ -32,3 +32,12 @@ def test_summarize_records_basic():
     assert summary["min_collection_date"] == date(2020, 1, 1)
     assert summary["max_collection_date"] == date(2021, 6, 1)
     assert summary["pct_missing_country"] == 0.5
+
+
+def test_summarize_records_empty():
+    summary = summarize_records([])
+
+    assert summary["count"] == 0
+    assert summary["min_collection_date"] is None
+    assert summary["max_collection_date"] is None
+    assert summary["pct_missing_country"] == 0.0

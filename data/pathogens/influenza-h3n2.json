@@ -1,0 +1,36 @@
+{
+  "pathogen_id": "influenza-h3n2",
+  "display_name": "Influenza A H3N2",
+  "organism_query": "\"Influenza A virus\"[Organism] AND \"H3N2\" AND \"complete genome\"[Title]",
+  "reference_accession": "CY163680",
+  "min_genome_length": 12000,
+  "max_genome_length": 15000,
+  "description": "Influenza A/H3N2. Reference: CY163680 (A/Victoria/361/2011). Eight-segment genome; coordinates are approximate for concatenated assembly.",
+  "genes": [
+    {"name": "PB2", "start": 1,    "end": 2341,  "comment": "Polymerase basic 2 — cap-binding"},
+    {"name": "PB1", "start": 2342, "end": 4648,  "comment": "Polymerase basic 1 — RNA replication"},
+    {"name": "PA",  "start": 4649, "end": 6924,  "comment": "Polymerase acidic — endonuclease"},
+    {"name": "HA",  "start": 6925, "end": 8706,  "comment": "Haemagglutinin — primary immune target"},
+    {"name": "NP",  "start": 8707, "end": 10213, "comment": "Nucleoprotein"},
+    {"name": "NA",  "start": 10214,"end": 11471, "comment": "Neuraminidase — oseltamivir/zanamivir target"},
+    {"name": "M",   "start": 11472,"end": 12444, "comment": "Matrix protein 1 & 2"},
+    {"name": "NS",  "start": 12445,"end": 13163, "comment": "Non-structural proteins — IFN antagonist"}
+  ],
+  "subgenes": [
+    {"name": "HA1",  "start": 6925, "end": 7773, "comment": "HA1 subunit — receptor binding, antigenic sites"},
+    {"name": "HA2",  "start": 7774, "end": 8706, "comment": "HA2 subunit — fusion peptide"},
+    {"name": "NA_head", "start": 10214, "end": 11200, "comment": "NA catalytic head — drug-binding site"}
+  ],
+  "gene_weights": {
+    "HA":  3,
+    "NA":  2,
+    "NS":  2,
+    "PB1": 1,
+    "PB2": 1,
+    "PA":  1,
+    "NP":  1,
+    "M":   1
+  },
+  "signatures_path": "data/lineages/influenza-h3n2-signatures.json",
+  "escape_path": "data/escape/influenza-h3n2-catalogue.json"
+}

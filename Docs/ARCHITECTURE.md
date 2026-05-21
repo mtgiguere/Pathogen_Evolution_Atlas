@@ -75,6 +75,22 @@ This ensures downstream analysis does **not** depend on the data source.
 
 ---
 
+## Metadata enrichment
+
+Some metadata (such as geographic location) may be missing or intentionally omitted
+in primary genome records.
+
+The system supports optional enrichment layers that can:
+
+- Augment records with additional metadata from linked sources
+- Operate as best-effort, non-authoritative enhancements
+- Be applied offline to preserve reproducibility
+
+Enrichment is explicitly separated from ingestion to avoid side effects
+and to ensure deterministic downstream analysis.
+
+---
+
 ## Mutation analysis
 
 Each genome sequence is compared to a reference genome.

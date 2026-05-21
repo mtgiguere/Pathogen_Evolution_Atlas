@@ -28,7 +28,7 @@ Implemented:
 
 ## Medium-term goals (v2)
 
-- Geographic aggregation
+- Geographic aggregation (when location metadata is available)
 - Variant trend analysis
 - Feature extraction for machine learning
 - Risk forecasting experiments
@@ -41,6 +41,8 @@ Implemented:
 - Multiple pathogens (not only SARS-CoV-2)
 - Explainable ML models
 - Educational and research use cases
+- Hybrid datasets combining evolutionary sequences with external geographic observations
+
 
 ---
 
