@@ -78,11 +78,13 @@ def forecast_variant_frequencies(
         base = last_counts[lineage]
 
         for t in range(1, n_weeks + 1):
-            rows.append({
-                "lineage": lineage,
-                "week": _advance_week(last_week, t),
-                "projected_count": base * math.exp(rate * t),
-            })
+            rows.append(
+                {
+                    "lineage": lineage,
+                    "week": _advance_week(last_week, t),
+                    "projected_count": base * math.exp(rate * t),
+                }
+            )
 
     if not rows:
         return empty

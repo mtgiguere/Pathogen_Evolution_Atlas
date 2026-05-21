@@ -49,8 +49,8 @@ def test_translate_mutation_nonsynonymous():
     assert aa_mut is not None
     assert aa_mut.gene == "S"
     assert aa_mut.aa_pos == 1
-    assert aa_mut.ref_aa == "A"   # GCT = Ala
-    assert aa_mut.alt_aa == "S"   # TCT = Ser
+    assert aa_mut.ref_aa == "A"  # GCT = Ala
+    assert aa_mut.alt_aa == "S"  # TCT = Ser
 
 
 def test_translate_mutation_synonymous_returns_none():
@@ -74,8 +74,8 @@ def test_translate_mutation_second_codon():
     aa_mut = translate_mutation(mut, ref)
     assert aa_mut is not None
     assert aa_mut.aa_pos == 2
-    assert aa_mut.ref_aa == "F"   # TTT = Phe
-    assert aa_mut.alt_aa == "I"   # ATT = Ile
+    assert aa_mut.ref_aa == "F"  # TTT = Phe
+    assert aa_mut.alt_aa == "I"  # ATT = Ile
 
 
 def test_translate_mutation_unknown_gene_returns_none():
@@ -92,10 +92,7 @@ def _make_sig(
     aa_muts: list[tuple[str, int, str, str]],
     min_hit: float = 0.6,
 ) -> LineageSignature:
-    defining = [
-        AminoAcidMutation(gene=g, aa_pos=p, ref_aa=r, alt_aa=a)
-        for g, p, r, a in aa_muts
-    ]
+    defining = [AminoAcidMutation(gene=g, aa_pos=p, ref_aa=r, alt_aa=a) for g, p, r, a in aa_muts]
     return LineageSignature(
         name=name,
         display_name=name,
@@ -178,9 +175,7 @@ def test_classify_picks_highest_confidence_lineage():
         AminoAcidMutation(gene="S", aa_pos=478, ref_aa="T", alt_aa="K"),
         AminoAcidMutation(gene="S", aa_pos=614, ref_aa="D", alt_aa="G"),
     ]
-    classifier = LineageClassifier(
-        reference_sequence="A" * 30000, signatures=[sig_delta, sig_ba2]
-    )
+    classifier = LineageClassifier(reference_sequence="A" * 30000, signatures=[sig_delta, sig_ba2])
     result = classifier.classify_aa(observed)
     assert result.lineage == "BA.2"
     assert result.confidence == pytest.approx(1.0)
@@ -214,7 +209,7 @@ def test_load_signatures_from_json():
     names = {s.name for s in sigs}
     assert len(sigs) >= 5
     assert "B.1.617.2" in names  # Delta
-    assert "JN.1" in names       # recent Omicron descendant
+    assert "JN.1" in names  # recent Omicron descendant
     for sig in sigs:
         assert len(sig.defining_mutations) >= 2
         assert 0 < sig.min_hit_fraction <= 1.0
@@ -250,9 +245,7 @@ def test_load_signatures_roundtrip():
             ],
         }
     ]
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
         json.dump(payload, f)
         tmp_path = Path(f.name)
 

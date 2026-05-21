@@ -22,11 +22,11 @@ _DECLINING_THRESHOLD = -0.05
 @dataclass
 class GrowthRate:
     lineage: str
-    growth_rate: float          # ln-scale slope per week; NaN if insufficient data
-    doubling_time_days: float   # positive only for growing variants; NaN otherwise
-    r_squared: float            # goodness-of-fit; NaN if insufficient data
-    n_timepoints: int           # number of weekly bins used in the fit
-    trend: str                  # "Growing" | "Declining" | "Stable" | "Insufficient data"
+    growth_rate: float  # ln-scale slope per week; NaN if insufficient data
+    doubling_time_days: float  # positive only for growing variants; NaN otherwise
+    r_squared: float  # goodness-of-fit; NaN if insufficient data
+    n_timepoints: int  # number of weekly bins used in the fit
+    trend: str  # "Growing" | "Declining" | "Stable" | "Insufficient data"
 
 
 def aggregate_by_week(
@@ -61,11 +61,7 @@ def aggregate_by_week(
         lambda d: f"{d.isocalendar().year}-W{d.isocalendar().week:02d}"
     )
 
-    counts = (
-        work.groupby(["lineage", "week"], sort=True)
-        .size()
-        .reset_index(name="count")
-    )
+    counts = work.groupby(["lineage", "week"], sort=True).size().reset_index(name="count")
 
     week_totals = counts.groupby("week")["count"].sum().rename("total")
     counts = counts.join(week_totals, on="week")
@@ -89,7 +85,14 @@ def estimate_growth_rates(
     required = {"lineage", "week", "count"}
     if weekly_df.empty or not required.issubset(weekly_df.columns):
         return pd.DataFrame(
-            columns=["lineage", "growth_rate", "doubling_time_days", "r_squared", "n_timepoints", "trend"]
+            columns=[
+                "lineage",
+                "growth_rate",
+                "doubling_time_days",
+                "r_squared",
+                "n_timepoints",
+                "trend",
+            ]
         )
 
     rows: list[dict] = []
@@ -100,14 +103,16 @@ def estimate_growth_rates(
         n = len(valid)
 
         if n < min_timepoints:
-            rows.append({
-                "lineage": lineage,
-                "growth_rate": float("nan"),
-                "doubling_time_days": float("nan"),
-                "r_squared": float("nan"),
-                "n_timepoints": n,
-                "trend": "Insufficient data",
-            })
+            rows.append(
+                {
+                    "lineage": lineage,
+                    "growth_rate": float("nan"),
+                    "doubling_time_days": float("nan"),
+                    "r_squared": float("nan"),
+                    "n_timepoints": n,
+                    "trend": "Insufficient data",
+                }
+            )
             continue
 
         x = np.arange(n, dtype=float)
@@ -132,13 +137,15 @@ def estimate_growth_rates(
             trend = "Stable"
             doubling = float("nan")
 
-        rows.append({
-            "lineage": lineage,
-            "growth_rate": float(slope),
-            "doubling_time_days": doubling,
-            "r_squared": r2,
-            "n_timepoints": n,
-            "trend": trend,
-        })
+        rows.append(
+            {
+                "lineage": lineage,
+                "growth_rate": float(slope),
+                "doubling_time_days": doubling,
+                "r_squared": r2,
+                "n_timepoints": n,
+                "trend": trend,
+            }
+        )
 
     return pd.DataFrame(rows)

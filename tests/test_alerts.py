@@ -46,14 +46,18 @@ def _genome_df(**overrides) -> pd.DataFrame:
 
 
 def _growth_df(lineage: str, doubling_days: float, trend: str = "Growing") -> pd.DataFrame:
-    return pd.DataFrame([{
-        "lineage": lineage,
-        "growth_rate": math.log(2) / (doubling_days / 7),
-        "doubling_time_days": doubling_days,
-        "r_squared": 0.95,
-        "n_timepoints": 4,
-        "trend": trend,
-    }])
+    return pd.DataFrame(
+        [
+            {
+                "lineage": lineage,
+                "growth_rate": math.log(2) / (doubling_days / 7),
+                "doubling_time_days": doubling_days,
+                "r_squared": 0.95,
+                "n_timepoints": 4,
+                "trend": trend,
+            }
+        ]
+    )
 
 
 # ── Alert dataclass ───────────────────────────────────────────────────────────
@@ -95,11 +99,13 @@ def test_high_risk_rule_no_alert_for_low():
 
 
 def test_high_risk_rule_fires_for_each_high_risk_genome():
-    df = pd.DataFrame([
-        {**_genome_df(risk_level="High", accession="A1").iloc[0]},
-        {**_genome_df(risk_level="High", accession="A2").iloc[0]},
-        {**_genome_df(risk_level="Low",  accession="A3").iloc[0]},
-    ])
+    df = pd.DataFrame(
+        [
+            {**_genome_df(risk_level="High", accession="A1").iloc[0]},
+            {**_genome_df(risk_level="High", accession="A2").iloc[0]},
+            {**_genome_df(risk_level="Low", accession="A3").iloc[0]},
+        ]
+    )
     rule = HighRiskGenomeRule()
     alerts = rule.evaluate(df)
     assert len(alerts) == 2
@@ -133,7 +139,9 @@ def test_critical_escape_rule_requires_has_critical_escape_true():
 
 def test_critical_escape_rule_context_includes_antibodies():
     rule = CriticalEscapeRule(min_escape_count=1)
-    df = _genome_df(escape_count=2, has_critical_escape=True, escape_antibodies="Bamlanivimab, REGN10933")
+    df = _genome_df(
+        escape_count=2, has_critical_escape=True, escape_antibodies="Bamlanivimab, REGN10933"
+    )
     alerts = rule.evaluate(df)
     assert len(alerts) == 1
     assert "antibodies" in alerts[0].context or "escape_antibodies" in alerts[0].context
@@ -189,10 +197,12 @@ def test_new_voc_rule_no_alert_for_non_voc():
 
 def test_new_voc_rule_deduplicates_within_df():
     # Same new VOC appears twice — one alert, not two
-    df = pd.DataFrame([
-        _genome_df(who_class="VOC", lineage="XBB.1.5").iloc[0],
-        _genome_df(who_class="VOC", lineage="XBB.1.5").iloc[0],
-    ])
+    df = pd.DataFrame(
+        [
+            _genome_df(who_class="VOC", lineage="XBB.1.5").iloc[0],
+            _genome_df(who_class="VOC", lineage="XBB.1.5").iloc[0],
+        ]
+    )
     rule = NewVOCDetectedRule(known_vocs=set())
     alerts = rule.evaluate(df)
     assert len(alerts) == 1
@@ -253,6 +263,7 @@ def test_engine_passes_growth_df_to_rules():
 
 def test_log_channel_logs_alert(caplog):
     import logging
+
     ch = LogChannel()
     alert = Alert(level="WARNING", rule_name="test", message="Watch out")
     with caplog.at_level(logging.WARNING, logger="src.ingest.alerts"):
@@ -267,7 +278,9 @@ def test_file_channel_writes_alert():
     with tempfile.NamedTemporaryFile(suffix=".ndjson", delete=False) as f:
         tmp = Path(f.name)
     ch = FileChannel(path=tmp)
-    alert = Alert(level="CRITICAL", rule_name="rule1", message="Critical finding", context={"acc": "X"})
+    alert = Alert(
+        level="CRITICAL", rule_name="rule1", message="Critical finding", context={"acc": "X"}
+    )
     ch.send(alert)
     lines = tmp.read_text(encoding="utf-8").strip().splitlines()
     assert len(lines) == 1
@@ -308,6 +321,7 @@ def test_webhook_channel_posts_to_url():
 
 def test_webhook_channel_logs_on_failure(caplog):
     import logging
+
     ch = WebhookChannel(url="https://hooks.example.com/test")
     alert = Alert(level="CRITICAL", rule_name="r", message="important")
     with patch("src.ingest.alerts.requests.post", side_effect=Exception("timeout")):

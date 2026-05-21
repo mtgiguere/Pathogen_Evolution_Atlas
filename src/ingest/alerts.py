@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Alert:
-    level: str                          # "INFO" | "WARNING" | "CRITICAL"
+    level: str  # "INFO" | "WARNING" | "CRITICAL"
     rule_name: str
     message: str
     context: dict[str, Any] = field(default_factory=dict)
@@ -58,9 +58,7 @@ class HighRiskGenomeRule:
 
     name = "high_risk_genome"
 
-    def evaluate(
-        self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None
-    ) -> list[Alert]:
+    def evaluate(self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None) -> list[Alert]:
         if df.empty or "risk_level" not in df.columns:
             return []
         alerts: list[Alert] = []
@@ -93,14 +91,11 @@ class CriticalEscapeRule:
     def __init__(self, min_escape_count: int = 2) -> None:
         self.min_escape_count = min_escape_count
 
-    def evaluate(
-        self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None
-    ) -> list[Alert]:
+    def evaluate(self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None) -> list[Alert]:
         if df.empty or "escape_count" not in df.columns:
             return []
-        mask = (
-            df["has_critical_escape"].astype(bool)
-            & (df["escape_count"] >= self.min_escape_count)
+        mask = df["has_critical_escape"].astype(bool) & (
+            df["escape_count"] >= self.min_escape_count
         )
         alerts: list[Alert] = []
         for _, row in df[mask].iterrows():
@@ -135,9 +130,7 @@ class FastGrowingVariantRule:
     def __init__(self, max_doubling_time_days: float = 14.0) -> None:
         self.max_doubling_time_days = max_doubling_time_days
 
-    def evaluate(
-        self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None
-    ) -> list[Alert]:
+    def evaluate(self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None) -> list[Alert]:
         if growth_df is None or growth_df.empty or "doubling_time_days" not in growth_df.columns:
             return []
         alerts: list[Alert] = []
@@ -151,10 +144,7 @@ class FastGrowingVariantRule:
                     Alert(
                         level="WARNING",
                         rule_name=self.name,
-                        message=(
-                            f"Fast-growing variant: {lineage} "
-                            f"doubling every {dt:.1f} days"
-                        ),
+                        message=(f"Fast-growing variant: {lineage} doubling every {dt:.1f} days"),
                         context={
                             "lineage": lineage,
                             "doubling_time_days": dt,
@@ -174,9 +164,7 @@ class NewVOCDetectedRule:
     def __init__(self, known_vocs: set[str]) -> None:
         self.known_vocs = set(known_vocs)
 
-    def evaluate(
-        self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None
-    ) -> list[Alert]:
+    def evaluate(self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None) -> list[Alert]:
         if df.empty or "who_class" not in df.columns:
             return []
         voc_df = df[df["who_class"] == "VOC"]
@@ -240,7 +228,9 @@ class WebhookChannel:
             if resp.status_code >= 400:
                 logger.warning(
                     "Webhook %s returned HTTP %d for alert %s",
-                    self.url, resp.status_code, alert.rule_name,
+                    self.url,
+                    resp.status_code,
+                    alert.rule_name,
                 )
         except Exception as exc:
             logger.warning("Webhook delivery failed for %s: %s", self.url, exc)
@@ -254,9 +244,7 @@ class AlertEngine:
         self.rules = rules
         self.channels = channels
 
-    def evaluate(
-        self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None
-    ) -> list[Alert]:
+    def evaluate(self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None) -> list[Alert]:
         alerts: list[Alert] = []
         for rule in self.rules:
             alerts.extend(rule.evaluate(df, growth_df=growth_df))
@@ -270,9 +258,7 @@ class AlertEngine:
                 except Exception:
                     logger.exception("Channel %s failed to deliver alert", channel)
 
-    def run(
-        self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None
-    ) -> list[Alert]:
+    def run(self, df: pd.DataFrame, *, growth_df: pd.DataFrame | None = None) -> list[Alert]:
         alerts = self.evaluate(df, growth_df=growth_df)
         if alerts:
             logger.info("AlertEngine: %d alert(s) fired", len(alerts))

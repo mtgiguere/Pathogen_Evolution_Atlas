@@ -23,6 +23,7 @@ for p in (_REF_PATH, _GENOMES_PATH):
         )
         st.stop()
 
+
 @st.cache_data
 def load_data(ref_path: Path, genomes_path: Path) -> pd.DataFrame:
     ref_rec = next(iter(load_ndjson(ref_path)))

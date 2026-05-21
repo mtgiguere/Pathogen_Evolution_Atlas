@@ -86,7 +86,7 @@ def test_find_escape_mutations_same_position_different_alt():
     observed = [AminoAcidMutation(gene="S", aa_pos=484, ref_aa="E", alt_aa="A")]
     matches = find_escape_mutations(observed, CATALOGUE)
     assert len(matches) == 1
-    assert matches[0].escape_entry == E484A   # matched E484A, not E484K
+    assert matches[0].escape_entry == E484A  # matched E484A, not E484K
 
 
 def test_find_escape_mutations_empty_observed():
@@ -129,7 +129,7 @@ def test_escape_from_nt_mutations_translates_and_matches():
 
 def test_escape_from_nt_mutations_synonymous_no_match():
     # GCT → GCC both Ala → synonymous → no AA change → no escape match
-    cat = [_entry("S", 1, "A", "A")]   # degenerate entry, should never match
+    cat = [_entry("S", 1, "A", "A")]  # degenerate entry, should never match
     ref = _make_ref(overrides={21563: "G", 21564: "C", 21565: "T"})
     nt_muts = [Mutation(pos=21565, ref="T", alt="C", gene="S")]
     assert escape_from_nt_mutations(nt_muts, ref, cat) == []
@@ -233,9 +233,7 @@ def test_load_escape_catalogue_roundtrip():
             "notes": entry.notes,
         }
     ]
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False, encoding="utf-8"
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
         json.dump(payload, f)
         tmp = Path(f.name)
 
