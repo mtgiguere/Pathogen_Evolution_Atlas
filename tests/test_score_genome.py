@@ -2,6 +2,11 @@
 xxxxxxxxxx
 """
 from ingest.scoring import score_genome
+from ingest.mutations import qc_compare_to_reference
+
+def qc_lenient(ref, sample):
+    return qc_compare_to_reference(ref, sample, min_overlap=1)
+
 
 def test_score_genome_sets_num_mutations_from_identified_mutations():
     from ingest.mutations import Mutation
@@ -20,7 +25,13 @@ def test_score_genome_sets_num_mutations_from_identified_mutations():
             Mutation(pos=3, ref="G", alt="A", gene="ORF1ab"),
         ]
 
-    summary = score_genome(canonical_record, identify_mutations=identify)
+    summary = score_genome(
+        canonical_record,
+        reference_sequence="A",
+        qc_fn=qc_lenient,
+        identify_mutations=identify,
+    )
+
 
     assert summary["num_mutations"] == 3
 
@@ -46,9 +57,12 @@ def test_score_genome_sets_genes_affected_from_gene_mapping():
 
     summary = score_genome(
         canonical_record,
+        reference_sequence="A",
+        qc_fn=qc_lenient,
         identify_mutations=identify,
         map_genes=map_genes,
     )
+
 
     assert summary["genes_affected"] == ["Spike", "N"]
 
@@ -71,6 +85,8 @@ def test_score_genome_sets_risk_score_from_risk_model():
 
     summary = score_genome(
         canonical_record,
+        reference_sequence="A",
+        qc_fn=qc_lenient,
         identify_mutations=identify,
         compute_risk=compute_risk,
     )
@@ -93,7 +109,13 @@ def test_score_genome_computes_real_risk_score_from_mutations():
     def identify(_record):
         return [Mutation(pos=1, ref="A", alt="G", gene="S")]
 
-    summary = score_genome(canonical_record, identify_mutations=identify)
+    summary = score_genome(
+        canonical_record,
+        reference_sequence="A",
+        qc_fn=qc_lenient,
+        identify_mutations=identify,
+    )
+
 
     assert summary["risk_score"] == float(score_mutations(identify(canonical_record))["score"])
 
@@ -104,7 +126,7 @@ def test_score_genome_includes_risk_explainability_fields():
 
     canonical_record = {
         "accession": "TEST3000",
-        "sequence": "XX",
+        "sequence": "AA",
         "source": "genbank",
     }
 
@@ -114,7 +136,12 @@ def test_score_genome_includes_risk_explainability_fields():
             Mutation(pos=2, ref="C", alt="T", gene="S"),
         ]
 
-    summary = score_genome(canonical_record, identify_mutations=identify)
+    summary = score_genome(
+        canonical_record,
+        reference_sequence="A",
+        qc_fn=qc_lenient,
+        identify_mutations=identify,
+    )
 
     assert summary["risk_level"] in {"Low", "Moderate", "High"}
     assert isinstance(summary["risk_by_gene"], dict)
@@ -130,7 +157,34 @@ def test_score_genome_uses_injected_reference_sequence_when_record_missing_refer
     }
     reference_sequence = "ACGT"
 
-    out = score_genome(record, reference_sequence=reference_sequence)
+    out = score_genome(
+        record,
+        reference_sequence=reference_sequence,
+        qc_fn=qc_lenient,
+    )
 
     assert out["num_mutations"] == 1
-    assert out["risk_score"] > 0
+    assert out["risk_score"] == 0.0
+
+
+def test_score_genome_blocks_high_N_fraction():
+    ref = "A" * 100
+    sample = ("A" * 40) + ("N" * 60)
+
+    record = {
+        "accession": "PX90_BAD",
+        "source": "genbank",
+        "sequence": sample,
+    }
+
+    out = score_genome(
+        record,
+        reference_sequence=ref,
+        qc_fn=lambda r, s: qc_compare_to_reference(r, s, min_overlap=1, max_n_fraction=0.10),
+    )
+
+    assert out["scorable"] is False
+    assert out["qc_status"] == "FAIL"
+    assert "HIGH_N_FRACTION" in out["qc_reasons"]
+    assert out["risk_level"] == "N/A"
+    assert out["risk_score"] is None

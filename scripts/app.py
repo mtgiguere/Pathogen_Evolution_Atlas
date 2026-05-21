@@ -23,11 +23,11 @@ ref_acc = ref_rec["accession"] if isinstance(ref_rec, dict) else ref_rec.accessi
 
 
 
-records = load_ndjson("data/raw/genomes.ndjson")
+records = list(load_ndjson("data/raw/genomes.ndjson"))
 df = summarize_genomes(
     records,
     reference_sequence=ref_seq,
-    reference_accession=ref_rec.accession,
+    reference_accession=ref_acc,
 )
 
 
@@ -133,6 +133,10 @@ if len(filtered):
         st.markdown(f"**Scorable:** {bool(row.get('scorable', False))}")
         if row.get("skip_reason", ""):
             st.markdown(f"**Skip reason:** `{row['skip_reason']}`")
+        if "qc_status" in row:
+            st.markdown(f"**QC:** {row.get('qc_status', '')}")
+        if row.get("qc_reasons", ""):
+            st.markdown(f"**QC reasons:** `{row['qc_reasons']}`")
 
     with cR:
         st.markdown("**Genes affected**")

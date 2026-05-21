@@ -28,7 +28,6 @@ def summarize_genomes(
 
     ref_seq = reference_sequence
 
-
     def _get(rec, key, default=None):
         if isinstance(rec, dict):
             return rec.get(key, default)
@@ -38,46 +37,63 @@ def summarize_genomes(
     for r in records:
         seq = _get(r, "sequence") or ""
 
-        # Decide if we can score this record
-        if not ref_seq:
-            scorable = False
-            skip_reason = "missing_reference"
-        elif not seq:
-            scorable = False
+        # --- Keep existing lightweight gates for backwards compatibility ---
+        if not seq:
+            pre_scorable = False
             skip_reason = "missing_sequence"
         elif len(seq) < 1000:
-            scorable = False
+            pre_scorable = False
             skip_reason = f"too_short ({len(seq)})"
         else:
-            scorable = True
+            pre_scorable = True
             skip_reason = ""
 
-        if scorable:
+        # Defaults (not scored)
+        s = {
+            "scorable": False,
+            "qc_status": "FAIL",
+            "qc_reasons": ["NOT_SCORED"],
+            "num_mutations": 0,
+            "genes_affected": [],
+            "risk_score": None,
+            "risk_level": "N/A",
+            "risk_explanation": "Not scored",
+            "risk_by_gene": {},
+        }
+
+        if pre_scorable:
             rec_for_scoring = {
                 "accession": _get(r, "accession"),
                 "source": _get(r, "source", "genbank"),
                 "sequence": seq,
-                "reference_sequence": ref_seq,
+                "reference_sequence": ref_seq,  # embed for compatibility with test stubs
             }
+
             s = score_genome(rec_for_scoring)
 
-            num_mutations = int(s.get("num_mutations", 0))
-            genes_list = list(s.get("genes_affected", []) or [])
-            mutations_list = list(s.get("mutations", []) or [])
-
-            risk_score = float(s.get("risk_score", 0.0))
-            risk_level = s.get("risk_level", "N/A")
-            risk_explanation = s.get("risk_explanation", "")
+            # If scoring says "not scorable" (QC fail), reflect that in skip_reason
+            if not bool(s.get("scorable", False)):
+                # Keep older-style skip_reason string but tie it to QC
+                reasons = list(s.get("qc_reasons", []) or [])
+                skip_reason = "qc_fail: " + ", ".join(reasons) if reasons else "qc_fail"
         else:
-            num_mutations = 0
-            genes_list = []
-            mutations_list = []
-            risk_score = 0.0
-            risk_level = "N/A"
-            risk_explanation = "Not scored: " + skip_reason
+            # keep your older explanation format
+            s["risk_explanation"] = "Not scored: " + skip_reason
+            s["qc_reasons"] = [skip_reason]
+            s["qc_status"] = "FAIL"
+
+        # Normalize outputs (backward compatible)
+        num_mutations = int(s.get("num_mutations", 0) or 0)
+        genes_list = list(s.get("genes_affected", []) or [])
+        risk_score_raw = s.get("risk_score", None)
+        risk_score = float(risk_score_raw) if risk_score_raw is not None else 0.0
+        risk_level = s.get("risk_level", "N/A") or "N/A"
+        risk_explanation = s.get("risk_explanation", "") or ""
+        qc_status = s.get("qc_status", "FAIL") or "FAIL"
+        qc_reasons_list = list(s.get("qc_reasons", []) or [])
+        qc_reasons_str = ", ".join(qc_reasons_list)
 
         genes_str = ", ".join(genes_list)
-        muts_str = ", ".join(mutations_list)
 
         rows.append(
             {
@@ -85,18 +101,23 @@ def summarize_genomes(
                 "accession": _get(r, "accession"),
                 "source": _get(r, "source", "genbank"),
                 "sequence_length": len(seq),
-                "scorable": scorable,
+                "scorable": bool(s.get("scorable", False)) if pre_scorable else False,
                 "skip_reason": skip_reason,
                 "num_mutations": num_mutations,
-                "genes_affected": genes_str,  # NOTE: keep as string for backwards compat
+                "genes_affected": genes_str,  # keep as string for backwards compat
                 "risk_score": risk_score,
                 "risk_level": risk_level,
                 "risk_explanation": risk_explanation,
-                "date": _get(r, "collection_date"),  # NOTE: keep name 'date' for tests
+                "date": _get(r, "collection_date"),
                 "lat": _get(r, "lat"),
                 "lon": _get(r, "lon"),
 
-                # ---- extra “Tableau surface” columns (new, optional) ----
+                # ---- QC surfaced (new) ----
+                "qc_status": qc_status,
+                "qc_reasons": qc_reasons_str,
+                "qc_reasons_list": qc_reasons_list,
+
+                # ---- extra columns (existing optional) ----
                 "collection_date": _get(r, "collection_date"),
                 "organism": _get(r, "organism"),
                 "host": _get(r, "host"),
@@ -104,8 +125,8 @@ def summarize_genomes(
                 "region": _get(r, "region"),
                 "genes_affected_list": genes_list,
                 "genes_affected_count": len(set(genes_list)),
-                "mutations": mutations_list,
-                "mutations_str": muts_str,
+                "mutations": list(s.get("mutations", []) or []),
+                "mutations_str": ", ".join(list(s.get("mutations", []) or [])),
                 "reference_accession": reference_accession,
                 "reference_length": len(ref_seq),
             }
