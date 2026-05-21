@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from collections.abc import Iterable
 from dataclasses import replace
 from xml.etree import ElementTree as ET
@@ -8,6 +9,10 @@ from Bio import Entrez
 
 from .genbank import parse_location
 from .models import CanonicalGenomeRecord
+
+# NCBI allows 3 requests/second without an API key.
+# Each record requires 2 calls (elink + efetch), so 0.34 s/record keeps us safe.
+_DEFAULT_DELAY = 0.34
 
 
 def enrich_location_from_biosample(
@@ -83,11 +88,17 @@ def _fetch_biosample_geo_loc(accession: str, email: str) -> str | None:
 def enrich_many_locations(
     records: Iterable[CanonicalGenomeRecord],
     email: str,
+    *,
+    delay_seconds: float = _DEFAULT_DELAY,
 ) -> list[CanonicalGenomeRecord]:
     enriched: list[CanonicalGenomeRecord] = []
-    for r in records:
+    for i, r in enumerate(records):
         if r.country:
             enriched.append(r)
         else:
+            time.sleep(delay_seconds)
             enriched.append(enrich_location_from_biosample(r, email=email))
+            if (i + 1) % 10 == 0:
+                filled = sum(1 for rec in enriched if rec.country)
+                print(f"[geo] {i + 1} records processed, {filled} with country")
     return enriched
