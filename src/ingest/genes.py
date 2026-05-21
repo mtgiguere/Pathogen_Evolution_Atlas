@@ -55,6 +55,11 @@ _SPIKE_DOMAINS: list[tuple[int, int, str]] = [
 ]
 
 
+def gene_coordinates() -> list[tuple[int, int, str]]:
+    """Return a copy of the (start, end, gene_name) list for all structural genes."""
+    return list(_STRUCTURAL_GENES)
+
+
 def gene_for_position(pos: int) -> str | None:
     """Return the structural gene name for a 1-based nucleotide position, or None."""
     for start, end, name in _STRUCTURAL_GENES:

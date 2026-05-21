@@ -5,7 +5,7 @@ All coordinates based on NC_045512.2 (SARS-CoV-2 reference), 1-based.
 
 import pytest
 
-from src.ingest.genes import gene_for_position, subgene_for_position
+from src.ingest.genes import gene_coordinates, gene_for_position, subgene_for_position
 
 # ── Structural gene coverage ──────────────────────────────────────────────────
 
@@ -212,3 +212,27 @@ def test_subgene_none_for_intergenic():
     assert subgene_for_position(265) is None
     assert subgene_for_position(21556) is None
     assert subgene_for_position(29675) is None
+
+
+# ── gene_coordinates ──────────────────────────────────────────────────────────
+
+
+def test_gene_coordinates_returns_eleven_genes():
+    coords = gene_coordinates()
+    assert len(coords) == 11
+
+
+def test_gene_coordinates_contains_expected_genes():
+    names = {name for _, _, name in gene_coordinates()}
+    assert names == {"ORF1ab", "S", "ORF3a", "E", "M", "ORF6", "ORF7a", "ORF7b", "ORF8", "N", "ORF10"}
+
+
+def test_gene_coordinates_orf1ab_bounds():
+    coords = {name: (s, e) for s, e, name in gene_coordinates()}
+    assert coords["ORF1ab"] == (266, 21555)
+
+
+def test_gene_coordinates_returns_copy():
+    c1 = gene_coordinates()
+    c1.append((0, 0, "fake"))
+    assert len(gene_coordinates()) == 11

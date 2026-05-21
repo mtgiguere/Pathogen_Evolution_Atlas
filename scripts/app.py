@@ -1,5 +1,6 @@
 import math
 import os
+from collections import Counter
 from datetime import datetime as _dt
 from pathlib import Path
 
@@ -9,6 +10,7 @@ import streamlit as st
 
 from ingest.analytics import summarize_genomes
 from ingest.forecast import forecast_variant_frequencies
+from ingest.genes import gene_coordinates
 from ingest.growth import aggregate_by_week, estimate_growth_rates
 from ingest.io import load_ndjson
 
@@ -54,6 +56,30 @@ def compute_trajectories(genome_df: pd.DataFrame, n_forecast_weeks: int = 8):
     rates = estimate_growth_rates(weekly)
     forecast = forecast_variant_frequencies(weekly, rates, n_weeks=n_forecast_weeks)
     return weekly, rates, forecast
+
+
+@st.cache_data
+def compute_gene_mutation_burden(genome_df: pd.DataFrame) -> pd.DataFrame:
+    total = int((genome_df["scorable"] == True).sum())  # noqa: E712
+    gene_counts: Counter = Counter()
+    for gene_list in genome_df["genes_affected_list"].dropna():
+        if isinstance(gene_list, list):
+            gene_counts.update(gene_list)
+    rows = []
+    for start, end, gene in gene_coordinates():
+        count = gene_counts.get(gene, 0)
+        rows.append({
+            "gene": gene,
+            "start": start,
+            "end": end,
+            "center": (start + end) / 2,
+            "y0": 0.0,
+            "y1": 1.0,
+            "ymid": 0.5,
+            "mutation_count": count,
+            "mutation_pct": round(count / max(total, 1) * 100, 1),
+        })
+    return pd.DataFrame(rows)
 
 # Make sure "date" behaves like a date for charts
 if "date" in df.columns:
@@ -246,6 +272,85 @@ if "lineage" in df.columns and "collection_date" in df.columns:
             st.info("Lineage classification unavailable — provide a signatures file to enable trajectories.")
     else:
         st.info("Not enough weekly data for trajectory analysis.")
+
+# --- Genome Mutation Map ---
+st.subheader("Genome Mutation Map")
+
+gene_burden_df = compute_gene_mutation_burden(df)
+
+if not gene_burden_df.empty:
+    wide_genes = gene_burden_df[gene_burden_df["end"] - gene_burden_df["start"] > 1500].copy()
+    color_enc = alt.Color("gene:N", legend=alt.Legend(title="Gene", orient="right"))
+
+    genome_track = (
+        alt.Chart(gene_burden_df)
+        .mark_rect()
+        .encode(
+            x=alt.X(
+                "start:Q",
+                scale=alt.Scale(domain=[0, 29903]),
+                title="Genome position (nt)",
+                axis=alt.Axis(format=",", labelAngle=0),
+            ),
+            x2="end:Q",
+            y=alt.Y("y0:Q", scale=alt.Scale(domain=[0, 1]), axis=None),
+            y2="y1:Q",
+            color=color_enc,
+            opacity=alt.Opacity(
+                "mutation_pct:Q",
+                scale=alt.Scale(range=[0.25, 1.0]),
+                legend=alt.Legend(title="% genomes"),
+            ),
+            tooltip=[
+                "gene:N",
+                alt.Tooltip("start:Q", title="Start", format=","),
+                alt.Tooltip("end:Q", title="End", format=","),
+                alt.Tooltip("mutation_count:Q", title="Genomes with mutations"),
+                alt.Tooltip("mutation_pct:Q", title="% of scorable genomes", format=".1f"),
+            ],
+        )
+        .properties(height=60, title="Gene track · opacity = mutation prevalence")
+    )
+
+    gene_labels = (
+        alt.Chart(wide_genes)
+        .mark_text(align="center", baseline="middle", fontWeight="bold", color="white", fontSize=9)
+        .encode(
+            x=alt.X("center:Q", scale=alt.Scale(domain=[0, 29903])),
+            y=alt.Y("ymid:Q", scale=alt.Scale(domain=[0, 1])),
+            text="gene:N",
+        )
+    )
+
+    bar_chart = (
+        alt.Chart(gene_burden_df)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                "gene:N",
+                sort=alt.EncodingSortField(field="mutation_pct", order="descending"),
+                title="Gene",
+            ),
+            y=alt.Y("mutation_pct:Q", title="% of scorable genomes with mutations"),
+            color=color_enc,
+            tooltip=[
+                "gene:N",
+                alt.Tooltip("mutation_count:Q", title="Genomes with mutations"),
+                alt.Tooltip("mutation_pct:Q", title="% of scorable genomes", format=".1f"),
+            ],
+        )
+        .properties(height=220)
+    )
+
+    genome_map = (
+        alt.vconcat(
+            genome_track + gene_labels,
+            bar_chart,
+        )
+        .resolve_scale(color="shared")
+    )
+
+    st.altair_chart(genome_map, use_container_width=True)
 
 # --- Table ---
 st.subheader("Genome Summary")
