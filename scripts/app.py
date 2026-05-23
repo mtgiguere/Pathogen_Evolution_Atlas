@@ -1,4 +1,6 @@
+import math
 import os
+from collections import Counter
 from datetime import datetime as _dt
 from pathlib import Path
 
@@ -8,6 +10,7 @@ import streamlit as st
 
 from ingest.analytics import summarize_genomes
 from ingest.forecast import forecast_variant_frequencies
+from ingest.genes import gene_coordinates
 from ingest.growth import aggregate_by_week, estimate_growth_rates
 from ingest.io import load_ndjson
 
@@ -49,10 +52,34 @@ def _week_to_date(week_str: str) -> pd.Timestamp:
 def compute_trajectories(genome_df: pd.DataFrame, n_forecast_weeks: int = 8):
     weekly = aggregate_by_week(genome_df)
     if weekly.empty:
-        return pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     rates = estimate_growth_rates(weekly)
     forecast = forecast_variant_frequencies(weekly, rates, n_weeks=n_forecast_weeks)
-    return weekly, forecast
+    return weekly, rates, forecast
+
+
+@st.cache_data
+def compute_gene_mutation_burden(genome_df: pd.DataFrame) -> pd.DataFrame:
+    total = int((genome_df["scorable"] == True).sum())  # noqa: E712
+    gene_counts: Counter = Counter()
+    for gene_list in genome_df["genes_affected_list"].dropna():
+        if isinstance(gene_list, list):
+            gene_counts.update(gene_list)
+    rows = []
+    for start, end, gene in gene_coordinates():
+        count = gene_counts.get(gene, 0)
+        rows.append({
+            "gene": gene,
+            "start": start,
+            "end": end,
+            "center": (start + end) / 2,
+            "y0": 0.0,
+            "y1": 1.0,
+            "ymid": 0.5,
+            "mutation_count": count,
+            "mutation_pct": round(count / max(total, 1) * 100, 1),
+        })
+    return pd.DataFrame(rows)
 
 # Make sure "date" behaves like a date for charts
 if "date" in df.columns:
@@ -89,6 +116,53 @@ c2.metric("Avg Risk", round(avg_risk, 2))
 
 unique_genes = int(filtered["genes_affected"].nunique()) if len(filtered) else 0
 c3.metric("Unique Genes", unique_genes)
+
+# --- Threat Monitor ---
+st.subheader("Threat Monitor")
+
+if "lineage" in df.columns and "collection_date" in df.columns:
+    _weekly_threat, rates_df, _fcast_threat = compute_trajectories(df)
+
+    if not rates_df.empty:
+        growing = rates_df[rates_df["trend"] == "Growing"].dropna(subset=["doubling_time_days"])
+
+        if not growing.empty:
+            top = growing.nsmallest(1, "doubling_time_days").iloc[0]
+            dt = float(top["doubling_time_days"])
+            lineage = top["lineage"]
+            rate = float(top["growth_rate"])
+            r2 = float(top["r_squared"])
+            n_pts = int(top["n_timepoints"])
+            weekly_pct = (math.exp(rate) - 1) * 100
+
+            severity = "🔴 CRITICAL" if dt < 7 else "🟠 HIGH" if dt < 14 else "🟡 MODERATE"
+            alert_fn = st.error if dt < 7 else st.warning
+
+            alert_fn(
+                f"**{severity} — {lineage}**  \n"
+                f"Doubling every **{dt:.1f} days** · "
+                f"+{weekly_pct:.0f}% per week · "
+                f"R² = {r2:.2f} ({n_pts} weeks of data)"
+            )
+
+            if len(growing) > 1:
+                table = (
+                    growing.nsmallest(6, "doubling_time_days")[
+                        ["lineage", "doubling_time_days", "growth_rate", "r_squared", "n_timepoints"]
+                    ]
+                    .rename(columns={
+                        "lineage": "Lineage",
+                        "doubling_time_days": "Doubling (days)",
+                        "growth_rate": "Growth rate",
+                        "r_squared": "R²",
+                        "n_timepoints": "Weeks of data",
+                    })
+                )
+                st.dataframe(table, use_container_width=True, hide_index=True)
+        else:
+            st.success("✅ No fast-growing variants detected in current data.")
+    else:
+        st.info("Not enough data for threat analysis.")
 
 # --- Quick visuals ---
 st.subheader("Overview")
@@ -127,7 +201,7 @@ with colB:
 st.subheader("Variant Frequency Trajectories")
 
 if "lineage" in df.columns and "collection_date" in df.columns:
-    weekly_df, forecast_df = compute_trajectories(df)
+    weekly_df, _rates, forecast_df = compute_trajectories(df)
 
     if not weekly_df.empty:
         top_lineages = (
@@ -199,6 +273,85 @@ if "lineage" in df.columns and "collection_date" in df.columns:
     else:
         st.info("Not enough weekly data for trajectory analysis.")
 
+# --- Genome Mutation Map ---
+st.subheader("Genome Mutation Map")
+
+gene_burden_df = compute_gene_mutation_burden(df)
+
+if not gene_burden_df.empty:
+    wide_genes = gene_burden_df[gene_burden_df["end"] - gene_burden_df["start"] > 1500].copy()
+    color_enc = alt.Color("gene:N", legend=alt.Legend(title="Gene", orient="right"))
+
+    genome_track = (
+        alt.Chart(gene_burden_df)
+        .mark_rect()
+        .encode(
+            x=alt.X(
+                "start:Q",
+                scale=alt.Scale(domain=[0, 29903]),
+                title="Genome position (nt)",
+                axis=alt.Axis(format=",", labelAngle=0),
+            ),
+            x2="end:Q",
+            y=alt.Y("y0:Q", scale=alt.Scale(domain=[0, 1]), axis=None),
+            y2="y1:Q",
+            color=color_enc,
+            opacity=alt.Opacity(
+                "mutation_pct:Q",
+                scale=alt.Scale(range=[0.25, 1.0]),
+                legend=alt.Legend(title="% genomes"),
+            ),
+            tooltip=[
+                "gene:N",
+                alt.Tooltip("start:Q", title="Start", format=","),
+                alt.Tooltip("end:Q", title="End", format=","),
+                alt.Tooltip("mutation_count:Q", title="Genomes with mutations"),
+                alt.Tooltip("mutation_pct:Q", title="% of scorable genomes", format=".1f"),
+            ],
+        )
+        .properties(height=60, title="Gene track · opacity = mutation prevalence")
+    )
+
+    gene_labels = (
+        alt.Chart(wide_genes)
+        .mark_text(align="center", baseline="middle", fontWeight="bold", color="white", fontSize=9)
+        .encode(
+            x=alt.X("center:Q", scale=alt.Scale(domain=[0, 29903])),
+            y=alt.Y("ymid:Q", scale=alt.Scale(domain=[0, 1])),
+            text="gene:N",
+        )
+    )
+
+    bar_chart = (
+        alt.Chart(gene_burden_df)
+        .mark_bar()
+        .encode(
+            x=alt.X(
+                "gene:N",
+                sort=alt.EncodingSortField(field="mutation_pct", order="descending"),
+                title="Gene",
+            ),
+            y=alt.Y("mutation_pct:Q", title="% of scorable genomes with mutations"),
+            color=color_enc,
+            tooltip=[
+                "gene:N",
+                alt.Tooltip("mutation_count:Q", title="Genomes with mutations"),
+                alt.Tooltip("mutation_pct:Q", title="% of scorable genomes", format=".1f"),
+            ],
+        )
+        .properties(height=220)
+    )
+
+    genome_map = (
+        alt.vconcat(
+            genome_track + gene_labels,
+            bar_chart,
+        )
+        .resolve_scale(color="shared")
+    )
+
+    st.altair_chart(genome_map, use_container_width=True)
+
 # --- Table ---
 st.subheader("Genome Summary")
 st.dataframe(filtered, use_container_width=True)
@@ -240,3 +393,55 @@ if len(filtered):
         st.write(row.get("risk_explanation", ""))
 else:
     st.info("Nothing to show. Try widening filters or enabling 'Include unscored'.")
+
+# --- Methods ---
+with st.expander("How it works", expanded=False):
+    st.markdown("""
+### Data source
+Genome sequences are fetched from **NCBI GenBank** via the Entrez API.
+The reference genome is **NC_045512.2** (Wuhan-Hu-1, 29,903 nt).
+
+### Mutation detection
+Each genome is compared to the reference using a pairwise nucleotide diff.
+Only unambiguous bases (A/C/G/T) are compared — positions containing N or
+IUPAC ambiguity codes are skipped.
+
+**QC filters applied before scoring:**
+- Sequence must overlap ≥ 80% of the reference length
+- N-base fraction must be < 10%
+- Non-ACGT fraction must be < 2%
+
+### Gene annotation
+Mutations are mapped to 11 structural genes using NC_045512.2 coordinates.
+ORF1ab is further resolved to 15 non-structural proteins (nsp1–nsp16).
+Spike is annotated to functional subdomains (NTD, RBD, fusion peptide,
+HR1, HR2).
+
+### Risk scoring
+A gene-weighted score aggregates mutations across genes, with Spike
+mutations carrying the highest weight (immune evasion potential).
+Scores are classified as **Low / Moderate / High**.
+
+### Growth rate estimation
+Sequences are binned by ISO week and lineage.
+A **log-linear model** is fit per lineage: ln(count) ~ week_index.
+- Slope > 0.05 /week → **Growing** (≈ 5% weekly increase threshold)
+- Slope < −0.05 /week → **Declining**
+- Otherwise → **Stable**
+
+R² is reported as a goodness-of-fit metric.
+Lineages with fewer than 3 weekly observations are excluded.
+
+### Variant frequency forecast
+Frequencies are projected forward using exponential growth:
+
+> **count(t) = last\_count × exp(growth\_rate × t)**
+
+where *t* is weeks from the last observed data point.
+Projected counts are normalised across all lineages each week so
+frequencies always sum to 1.0.
+Lineages with no valid growth rate are excluded from the forecast.
+
+---
+*Pipeline source: [github.com/mtgiguere/Pathogen_Evolution_Atlas](https://github.com/mtgiguere/Pathogen_Evolution_Atlas)*
+    """)

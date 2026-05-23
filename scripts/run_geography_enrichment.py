@@ -27,9 +27,10 @@ def main() -> None:
     if not IN_PATH.exists():
         raise FileNotFoundError(f"Input file not found: {IN_PATH}")
 
-    records = load_ndjson(IN_PATH)
+    records = list(load_ndjson(IN_PATH))
 
     before_missing = sum(1 for r in records if not r.country)
+    print(f"[geo] {len(records)} records loaded, {before_missing} missing country")
 
     enriched = enrich_many_locations(records, email=EMAIL)
 
