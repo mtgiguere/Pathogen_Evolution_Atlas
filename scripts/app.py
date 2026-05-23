@@ -17,7 +17,7 @@ from ingest.io import load_ndjson
 EMAIL = os.getenv("NCBI_EMAIL", "you@domain.com")
 
 _REF_PATH = Path(os.getenv("REF_PATH", "data/reference/genbank_reference.ndjson"))
-_GENOMES_PATH = Path(os.getenv("GENOMES_PATH", "data/raw/genomes.ndjson"))
+_GENOMES_PATH = Path(os.getenv("GENOMES_PATH", "data/sample/genomes.ndjson"))
 
 st.set_page_config(page_title="Pathogen Evolution Atlas", layout="wide")
 st.title("🧬 Pathogen Evolution Atlas")
