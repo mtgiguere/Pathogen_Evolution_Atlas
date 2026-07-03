@@ -1,0 +1,29 @@
+name: QA
+
+# Delegates to central reusable workflows in mtgiguere/qa_pipeline.
+# CodeQL is left to this repo's existing codeql.yml to avoid a duplicate run.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    uses: mtgiguere/qa_pipeline/.github/workflows/python-qa.yml@main
+    with:
+      package-manager: pip
+      install-command: "python -m pip install --upgrade pip && pip install -e . && pip install -r requirements.txt && pip install ruff pip-audit pytest-cov"
+      coverage-package: src
+      enforce-coverage: false
+      run-format-check: false   # repo does not format-check today; adopt later
+      test-args: '-m "not integration"'
+      audit-args: '-r requirements.txt --ignore-vuln CVE-2025-68463 --ignore-vuln CVE-2026-0994'
+
+  security:
+    uses: mtgiguere/qa_pipeline/.github/workflows/security-qa.yml@main
+    with:
+      run-codeql: false         # already covered by this repo's codeql.yml
