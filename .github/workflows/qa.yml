@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write   # required by security-qa.yml even when CodeQL is off
 
 jobs:
   python:
