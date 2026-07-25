@@ -63,3 +63,49 @@ for mut in watch_list:
     arrow = "rising" if freqs[-1] > freqs[0] + 10 else "falling" if freqs[-1] < freqs[0] - 10 else "flat"
     name = f"{ref}{pos}{alt}"
     print(f"{name:>12}  {freqs[0]:7.0f}% {freqs[1]:7.0f}% {freqs[2]:7.0f}%  {arrow}")
+
+## Load each genome's lineage from the Nextclade results (a tab-separated file).
+# We collapse sub-lineages to their family: "XFG.3.16.1" -> "XFG".
+lineage = {}
+with open("nextclade_output/nextclade.tsv") as f:
+    header = f.readline().split("\t")
+    name_col = header.index("seqName")
+    pango_col = header.index("Nextclade_pango")
+    for line in f:
+        cols = line.split("\t")
+        full_lineage = cols[pango_col].strip()
+        family = full_lineage.split(".")[0] # part before the first dot
+        lineage[cols[name_col].strip()] = family
+
+# Quick check: what families do we have, and how many genomes each?
+# We collapse sub-lineages to their family: "XFG.3.16.1" -> "XFG".
+lineage = {}
+with open("nextclade_output/nextclade.tsv") as f:
+    header = f.readline().split("\t")
+    name_col = header.index("seqName")
+    pango_col = header.index("Nextclade_pango")
+    for line in f:
+        cols = line.split("\t")
+        full_lineage = cols[pango_col].strip()
+        family = full_lineage.split(".")[0] # part before the first dot
+        lineage[cols[name_col].strip()] = family
+# Quick check: what families do we have, and how many genomes each?
+family_counts = Counter(lineage.values())
+print()
+print("=== Lineage families in the dataset ===")
+for fam, n in family_counts.most_common():
+    print(f" {fam}: {n} genomes")
+
+# Track each lineage family's share within each trustworthy quarter.
+print()
+print("=== Lineage family share by quarter (Q3'25 -> Q4'25 -> Q1'26) ===")
+print(f"{'family':>8}   {'2025-Q3':>8}  {'2025-Q4':>8}  {'2026-Q1':>8}  trend")
+
+for fam in ["XFG", "NB", "PQ"]:
+    shares = []
+    for q in GOOD_QUARTERS:
+        genomes_this_q = genomes_by_quarter[q]
+        carriers = sum(1 for acc in genomes_this_q if lineage.get(acc) == fam)
+        shares.append(100 * carriers / len(genomes_this_q))
+    arrow = "rising" if shares[-1] > shares[0] + 10 else "falling" if shares[-1] < shares[0] - 10 else "flat"
+    print(f"{fam:>8}    {shares[0]:7.0f}% {shares[1]:7.0f}% {shares[2]:7.0f}%   {arrow}")

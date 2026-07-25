@@ -18,3 +18,8 @@ data/derived/
 *.fasta
 data/reference/
 mutation_calls.json
+
+# Nextclade (binary + regenerated outputs)
+nextclade
+nextclade_output/
+data/nextclade_sars/
