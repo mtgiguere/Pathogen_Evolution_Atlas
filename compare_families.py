@@ -66,3 +66,16 @@ for t in [80, 85, 90, 95]:
     print(f"\n threshold {t}% -> {len(xfg_only_t)} XFG-only:")
     for change in xfg_only_t:
         print(f"    {change}")
+# --- Three-way: is XFG's signature specific vs BOTH cousins? ---
+nb_n, nb_spikes = spike_counter_for("NB")
+nb_sig = rbd_signature(nb_n, nb_spikes)
+
+print(f"\n=== Three-way comparison (XFG {xfg_n}, PQ {pq_n}, NB {nb_n}) ===")
+
+xfg_vs_pq = xfg_sig - pq_sig            # XFG-only vs PQ (already knew this)
+xfg_vs_nb = xfg_sig - nb_sig            # XFG-only vs NB
+xfg_specific = xfg_sig - pq_sig - nb_sig  # in XFG, absent from BOTH cousins
+
+show("XFG-only vs PQ", xfg_vs_pq)
+show("XFG-only vs NB", xfg_vs_nb)
+show("XFG-specific (absent from BOTH PQ and NB)", xfg_specific)
