@@ -1,0 +1,153 @@
+{
+  "346": {
+    "XFG": {
+      "n": 193,
+      "changes": [
+        {
+          "change": "S:R346T",
+          "count": 193,
+          "pct": 100.0
+        }
+      ]
+    },
+    "PQ": {
+      "n": 29,
+      "changes": [
+        {
+          "change": "S:R346T",
+          "count": 1,
+          "pct": 3.4
+        }
+      ]
+    },
+    "NB": {
+      "n": 13,
+      "changes": [
+        {
+          "change": "S:R346K",
+          "count": 1,
+          "pct": 7.7
+        }
+      ]
+    }
+  },
+  "444": {
+    "XFG": {
+      "n": 193,
+      "changes": [
+        {
+          "change": "S:K444R",
+          "count": 190,
+          "pct": 98.4
+        }
+      ]
+    },
+    "PQ": {
+      "n": 29,
+      "changes": []
+    },
+    "NB": {
+      "n": 13,
+      "changes": []
+    }
+  },
+  "445": {
+    "XFG": {
+      "n": 193,
+      "changes": [
+        {
+          "change": "S:V445R",
+          "count": 177,
+          "pct": 91.7
+        },
+        {
+          "change": "S:V445P",
+          "count": 12,
+          "pct": 6.2
+        }
+      ]
+    },
+    "PQ": {
+      "n": 29,
+      "changes": [
+        {
+          "change": "S:V445P",
+          "count": 1,
+          "pct": 3.4
+        },
+        {
+          "change": "S:V445H",
+          "count": 28,
+          "pct": 96.6
+        }
+      ]
+    },
+    "NB": {
+      "n": 13,
+      "changes": [
+        {
+          "change": "S:V445H",
+          "count": 13,
+          "pct": 100.0
+        }
+      ]
+    }
+  },
+  "478": {
+    "XFG": {
+      "n": 193,
+      "changes": [
+        {
+          "change": "S:T478K",
+          "count": 193,
+          "pct": 100.0
+        }
+      ]
+    },
+    "PQ": {
+      "n": 29,
+      "changes": [
+        {
+          "change": "S:T478I",
+          "count": 11,
+          "pct": 37.9
+        }
+      ]
+    },
+    "NB": {
+      "n": 13,
+      "changes": [
+        {
+          "change": "S:T478I",
+          "count": 12,
+          "pct": 92.3
+        },
+        {
+          "change": "S:T478L",
+          "count": 1,
+          "pct": 7.7
+        }
+      ]
+    }
+  },
+  "487": {
+    "XFG": {
+      "n": 193,
+      "changes": [
+        {
+          "change": "S:N487D",
+          "count": 193,
+          "pct": 100.0
+        }
+      ]
+    },
+    "PQ": {
+      "n": 29,
+      "changes": []
+    },
+    "NB": {
+      "n": 13,
+      "changes": []
+    }
+  }
+}
