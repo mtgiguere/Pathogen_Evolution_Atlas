@@ -7,6 +7,24 @@
 </head>
 <body>
   <h1>Pathogen Evolution Atlas</h1>
-  <p>Site is live. Content coming soon.</p>
+  <h2>Position 478</h2>
+  <div id="output">Loading data...</div>
+
+  <script>
+    fetch("data/site/residues.json")
+      .then(response => response.json())
+      .then(data => {
+        const pos478 = data["478"];
+        let text = "";
+        for (const family of ["XFG", "PQ", "NB"]) {
+          const changes = pos478[family].changes;
+          text += family + ": " + JSON.stringify(changes) + "<br>";
+        }
+        document.getElementById("output").innerHTML = text;
+      })
+      .catch(error => {
+        document.getElementById("output").innerHTML = "Error: " + error;
+      });
+  </script>
 </body>
 </html>
