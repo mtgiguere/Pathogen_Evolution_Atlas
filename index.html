@@ -3,28 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pathogen Evolution Atlas</title>
+  <title>Pathogen Evolution Atlas </title>
+<style>
+  body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20 px; }
+  .row { margin: 12px 0; }
+  .label { font-weight: bold; margin-bottom: 4px; }
+  .bar {
+    height: 28px;
+    background: #4a90d9;
+    color: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    box-sizing: border-box;
+    white-space: nowrap;
+  }
+</style>
 </head>
 <body>
-  <h1>Pathogen Evolution Atlas</h1>
-  <h2>Position 478</h2>
-  <div id="output">Loading data...</div>
-
-  <script>
-    fetch("data/site/residues.json")
-      .then(response => response.json())
-      .then(data => {
+<h1>Pathogen Evolution Atlas</h1>
+<h2>Position 478: XFG keeps T478K while relatives diverge</h2>
+<div id="output">Loading data...</div>
+<script>
+  fetch("data/site/residues.json")
+  .then(response => response.json())
+  .then(data => {
         const pos478 = data["478"];
-        let text = "";
+        const output = document.getElementById("output");
+        output.innerHTML = "";
         for (const family of ["XFG", "PQ", "NB"]) {
-          const changes = pos478[family].changes;
-          text += family + ": " + JSON.stringify(changes) + "<br>";
+          for (const item of pos478[family].changes) {
+            const row = document.createElement("div");
+            row.className = "row";
+            row.innerHTML =
+              '<div class="label">' + family + " — " + item.change + '</div>' +
+              '<div class="bar" style="width:' + item.pct + '%">' + item.pct + '%</div>';
+            output.appendChild(row);
+          }
         }
-        document.getElementById("output").innerHTML = text;
       })
       .catch(error => {
         document.getElementById("output").innerHTML = "Error: " + error;
-      });
-  </script>
+  });
+</script>
 </body>
 </html>
