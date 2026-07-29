@@ -83,14 +83,39 @@
 <div id="figures"></div>
 
 <script>
-  // Stage 1: prove the grid lays out. Six placeholder cards, no real data yet.
-  const figures = document.getElementById("figures");
-  for (let n = 1; n <= 6; n++) {
+  fetch("data/site/residues.json")
+    .then(response => response.json())
+    .then(data => {
+      const figures = document.getElementById("figures");
+      figures.innerHTML = "";
+      const positions = [487, 445, 478, 346, 444];
+      positions.forEach((pos, index) => {
+        drawCard(index + 1, pos, data);
+      });
+    })
+    .catch(error => {
+      document.getElementById("figures").innerHTML = "Error: " + error;
+    });
+  function drawCard(figNum, position, data) {
+    const posData = data[position];
     const card = document.createElement("div");
-    card.className = "figure"
-    card.innerHTML = '<div class="fignum">' + n + '</div>' +
-                    '<p>Placeholder figure ' + n + '</p>';
-    figures.appendChild(card);                
+    card.className = "figure";
+
+    let html = '<div class="fignum">' + figNum + '</div>';
+    html += '<div class="label">Position ' + position + '</div>';
+
+    for (const family of ["XFG", "PQ", "NB"]) {
+      for (const item of posData[family].changes) {
+        const barClass = (family === "XFG") ? "bar" : "bar bar-cousin";
+        html += '<div class="row">';
+        html += '<div class="label">' + family + " - " + item.change + '</div>';
+        html += '<div class="' + barClass + '" style="width:' + item.pct + '%">' + item.pct + '%</div>';
+        html += '</div>';
+      }
+    }
+
+    card.innerHTML = html;
+    figures.appendChild(card);
   }
 </script>
 </body>
