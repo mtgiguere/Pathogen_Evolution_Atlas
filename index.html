@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pathogen Evolution Atlas </title>
 <style>
-  body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20 px; }
+  body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+  .figure {
+    border: 1.5px solid #090909;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 16px;
+  }
+  h2 { margin-bottom: 4px; }
   .row { margin: 12px 0; }
   .label { font-weight: bold; margin-bottom: 4px; }
   .bar {
@@ -20,12 +27,53 @@
     white-space: nowrap;
   }
   .bar-cousin { background: #b0b0b0; }
+  .legend { 
+    font-size: 14px;
+    color: #090909;
+    border-bottom: 1px solid #090909;
+    padding: 0 24px 16px 24px;
+    margin: 0 -24px 20px -24px;
+  }
+  .swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 4px;
+    margin-left: 12px;
+  }
+  .swatch-xfg { background: #4a90d9; }
+  .swatch-cousin { background: #b0b0b0; }
+  #output { margin-top: 8px; }
+  .caption { 
+    font-size: 14px;
+    color: #090909;
+    line-height: 1.5;
+    max-width: 600px;
+    border-top: 1px solid #090909;
+    padding: 16px 24px 0 24px;
+    margin: 20px -24px 0 -24px;
+  }
 </style>
 </head>
 <body>
 <h1>Pathogen Evolution Atlas</h1>
 <h2>Position 478: XFG keeps T478K while relatives diverge</h2>
+<div class="figure">
+<div class="legend">
+  <span class="swatch swatch-xfg"></span> XFG (the lineage of interest)
+  <span class="swatch swatch-cousin"></span> PQ, NB (related lineages)
+</div>
 <div id="output">Loading data...</div>
+<p class="caption">
+  At spike position 478, XFG retains the ancestral lysine (T478K) in 100% 
+  of sampled genomes, while the related lineages PQ and NB have diverged to 
+  isoleucine (T478I). Position 478 is highly variable across recent JN.1 
+  descendants, so XFG's conservation here is one of several features 
+  distinguishing it from its closest relatives in this dataset.
+</p>
+</div>
 <script>
   fetch("data/site/residues.json")
   .then(response => response.json())
