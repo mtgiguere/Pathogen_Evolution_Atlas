@@ -7,10 +7,9 @@
 <style>
   body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
   .figure {
-    border: 1.5px solid #090909;
-    border-radius: 8px;
+    border-top: 1.5px solid #090909;
+    border-left: 1.5px solid #090909;
     padding: 20px 24px;
-    margin-top: 16px;
   }
   h2 { margin-bottom: 4px; }
   .row { margin: 12px 0; }
@@ -55,47 +54,44 @@
     padding: 16px 24px 0 24px;
     margin: 20px -24px 0 -24px;
   }
+  #figures {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 20px;
+    border-right: 1.5px solid #090909;
+    border-bottom: 1.5px solid #090909;
+  }
+  .fignum {
+    display: inline-block;
+    background: #4a90d9;
+    color: white;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    margin-bottom: 8px;
+  }
 </style>
 </head>
 <body>
 <h1>Pathogen Evolution Atlas</h1>
-<h2>Position 478: XFG keeps T478K while relatives diverge</h2>
-<div class="figure">
-<div class="legend">
-  <span class="swatch swatch-xfg"></span> XFG (the lineage of interest)
-  <span class="swatch swatch-cousin"></span> PQ, NB (related lineages)
-</div>
-<div id="output">Loading data...</div>
-<p class="caption">
-  At spike position 478, XFG retains the ancestral lysine (T478K) in 100% 
-  of sampled genomes, while the related lineages PQ and NB have diverged to 
-  isoleucine (T478I). Position 478 is highly variable across recent JN.1 
-  descendants, so XFG's conservation here is one of several features 
-  distinguishing it from its closest relatives in this dataset.
-</p>
-</div>
+<p class="intro">XFG's distinguishing spike mutations versus its closest relatives (PQ, NB).</p>
+
+<div id="figures"></div>
+
 <script>
-  fetch("data/site/residues.json")
-  .then(response => response.json())
-  .then(data => {
-        const pos478 = data["478"];
-        const output = document.getElementById("output");
-        output.innerHTML = "";
-        for (const family of ["XFG", "PQ", "NB"]) {
-          for (const item of pos478[family].changes) {
-            const row = document.createElement("div");
-            row.className = "row";
-            const barClass = (family === "XFG") ? "bar" : "bar bar-cousin";
-            row.innerHTML =
-              '<div class="label">' + family + " — " + item.change + '</div>' +
-              '<div class="' + barClass + '" style="width:' + item.pct + '%">' + item.pct + '%</div>';
-            output.appendChild(row);
-          }
-        }
-      })
-      .catch(error => {
-        document.getElementById("output").innerHTML = "Error: " + error;
-  });
+  // Stage 1: prove the grid lays out. Six placeholder cards, no real data yet.
+  const figures = document.getElementById("figures");
+  for (let n = 1; n <= 6; n++) {
+    const card = document.createElement("div");
+    card.className = "figure"
+    card.innerHTML = '<div class="fignum">' + n + '</div>' +
+                    '<p>Placeholder figure ' + n + '</p>';
+    figures.appendChild(card);                
+  }
 </script>
 </body>
 </html>
