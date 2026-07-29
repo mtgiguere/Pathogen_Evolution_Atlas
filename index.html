@@ -19,6 +19,7 @@
     box-sizing: border-box;
     white-space: nowrap;
   }
+  .bar-cousin { background: #b0b0b0; }
 </style>
 </head>
 <body>
@@ -36,9 +37,10 @@
           for (const item of pos478[family].changes) {
             const row = document.createElement("div");
             row.className = "row";
+            const barClass = (family === "XFG") ? "bar" : "bar bar-cousin";
             row.innerHTML =
               '<div class="label">' + family + " — " + item.change + '</div>' +
-              '<div class="bar" style="width:' + item.pct + '%">' + item.pct + '%</div>';
+              '<div class="' + barClass + '" style="width:' + item.pct + '%">' + item.pct + '%</div>';
             output.appendChild(row);
           }
         }
