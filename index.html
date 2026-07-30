@@ -25,7 +25,7 @@
     box-sizing: border-box;
     white-space: nowrap;
   }
-  .bar-cousin { background: #b0b0b0; }
+  .bar-cousin { background: #85c35f; }
   .legend { 
     font-size: 14px;
     color: #090909;
@@ -74,6 +74,7 @@
     line-height: 24px;
     margin-bottom: 8px;
   }
+  .bar-ancestral { background: #d9d2c5; color: #444444; }
 </style>
 </head>
 <body>
@@ -109,6 +110,13 @@
     }
     return top;
   }
+  function ancestralPct(changes) {
+    let sum = 0
+    for (const item of changes) {
+      sum += item.pct;
+    }
+    return Math.round((100 - sum) / 10);
+  }
 
   function drawCard(figNum, position, data) {
     const posData = data[position];
@@ -120,14 +128,29 @@
     html += '<div class="label">Position ' + position + '</div>';
 
     for (const family of ["XFG", "PQ", "NB"]) {
-      const item = dominant(posData[family].changes);
-      if (item === null) {
-        continue;
+      const changes = posData[family].changes;
+      const topChange = dominant(changes);
+      const anc = ancestralPct(changes);
+      
+      let barLabel, barPct, isAncestral;
+      if (topChange === null || anc > topChange.pct) {
+        barLabel = "ancestral (no change)";
+        barPct = anc;
+        isAncestral = true;
+      } else {
+        barLabel = topChange.change;
+        barPct = topChange.pct;
+        isAncestral = false;
       }
-      const barClass = (family === "XFG") ? "bar" : "bar bar-cousin";
+      
+      let barClass = (family === "XFG") ? "bar" : "bar bar-cousin";
+      if (isAncestral) {
+        barClass += " bar-ancestral";
+      }
+
       html += '<div class="row">';
-      html += '<div class="label">' + family + " - " + item.change + '</div>';
-      html += '<div class="' + barClass + '" style="width:' + item.pct + '%">' + item.pct + '%</div>';
+      html += '<div class="label">' + family + " - " + barLabel + '</div>';
+      html += '<div class="' + barClass + '" style="width:' + barPct + '%">' + barPct + '%</div>';
       html += '</div>';
     }
 
