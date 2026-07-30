@@ -43,7 +43,7 @@
     margin-left: 12px;
   }
   .swatch-xfg { background: #4a90d9; }
-  .swatch-cousin { background: #b0b0b0; }
+  .swatch-cousin { background: #85c35f; }
   #output { margin-top: 8px; }
   .caption { 
     font-size: 14px;
@@ -75,11 +75,19 @@
     margin-bottom: 8px;
   }
   .bar-ancestral { background: #d9d2c5; color: #444444; }
+  .swatch-ancestral { background: #d9d2c5; }
+  .grid-legend { font-size: 14px; color:#090909; margin: 8px 0 16px 0; }
 </style>
 </head>
 <body>
 <h1>Pathogen Evolution Atlas</h1>
 <p class="intro">XFG's distinguishing spike mutations versus its closest relatives (PQ, NB).</p>
+
+<div class="grid-legend">
+  <span class="swatch swatch-xfg"></span> XFG (mutation present)
+  <span class="swatch swatch-cousin"></span> PQ / NB (mutation present)
+  <span class="swatch swatch-ancestral"></span> Ancestral residue (no change)
+</div>
 
 <div id="figures"></div>
 
