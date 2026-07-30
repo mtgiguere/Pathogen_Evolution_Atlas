@@ -77,6 +77,45 @@
   .bar-ancestral { background: #d9d2c5; color: #444444; }
   .swatch-ancestral { background: #d9d2c5; }
   .grid-legend { font-size: 14px; color:#090909; margin: 8px 0 16px 0; }
+  .rbd-track {
+    position: relative;
+    height: 40px;
+    background: #e8e8e8;
+    border-radius: 4px;
+    margin: 90px 0 40px 0;
+  }
+  .rbm-region {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: #c5d9e8
+  }
+  .pos-dot {
+    position: absolute;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    background: #4a90d9;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .pos-label {
+    position: absolute;
+    top: -22px;
+    font-size: 11px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .pos-line {
+    position: absolute;
+    width: 1px;
+    background: #999;
+    bottom: 50%;
+  }
+  .pos-line-diagonal {
+    transform: rotate(-20deg);
+    transform-origin: bottom;
+  }
 </style>
 </head>
 <body>
@@ -101,6 +140,7 @@
       positions.forEach((pos, index) => {
         drawCard(index + 1, pos, data);
       });
+      drawSchematic(6);
     })
     .catch(error => {
       document.getElementById("figures").innerHTML = "Error: " + error;
@@ -161,6 +201,50 @@
       html += '<div class="' + barClass + '" style="width:' + barPct + '%">' + barPct + '%</div>';
       html += '</div>';
     }
+
+    card.innerHTML = html;
+    figures.appendChild(card);
+  }
+  function drawSchematic(figNum) {
+    const RBD_START = 330;
+    const RBD_END = 530;
+    const RBM_START = 437;
+    const RBM_END = 508;
+
+    function toPercent(pos) {
+      return (pos - RBD_START) / (RBD_END - RBD_START) * 100;
+    }
+
+    const figures = document.getElementById("figures");
+    const card = document.createElement("div");
+    card.className = "figure";
+
+    let html = '<div class="fignum">' + figNum + '</div>';
+    html += '<div class="label">RBD position map (spike ' + RBD_START + '-' + RBD_END + ')</div>';
+
+    html += '<div class="rbd-track">';
+    const rbmLeft = toPercent(RBM_START);
+    const rbmWidth = toPercent(RBM_END) - toPercent(RBM_START);
+    html += '<div class="rbm-region" style="left:' +rbmLeft + '%; width:' + rbmWidth + '%"></div>';
+
+    const mapped = [487, 445, 478, 346, 444];
+    const heights = [70, 30, 50, 50, 60];
+    mapped.forEach((pos, index) => {
+      const left = toPercent(pos);
+      const lineHeight = heights[index % heights.length];
+
+      html += '<div class="pos-dot" style="left:' + left + '%"></div>';
+
+      if (pos === 444) {
+        html += '<div class="pos-line pos-line-diagonal" style="left:' + left + '%; height:' + lineHeight + 'px" ></div>';
+        html += '<div class="pos-label" style="left:calc(' + left + '% - 20px); bottom:' + (lineHeight + 22) + 'px; top:auto">' + pos + '</div>';
+      } else {
+        html += '<div class="pos-line" style="left:' + left + '%; height:' + lineHeight + 'px"></div>';
+        html += '<div class="pos-label" style="left:' + left + '%; bottom:' + (lineHeight + 22) + 'px; top:auto">' + pos + '</div>';
+      }
+    });
+
+    html += '</div>';
 
     card.innerHTML = html;
     figures.appendChild(card);
