@@ -96,8 +96,23 @@
     .catch(error => {
       document.getElementById("figures").innerHTML = "Error: " + error;
     });
+
+  function dominant(changes) {
+    if (changes.length === 0) {
+      return null;
+    }
+    let top = changes[0];
+    for (const item of changes) {
+      if (item.pct > top.pct) {
+        top = item;
+      }
+    }
+    return top;
+  }
+
   function drawCard(figNum, position, data) {
     const posData = data[position];
+    const figures = document.getElementById("figures");
     const card = document.createElement("div");
     card.className = "figure";
 
@@ -105,13 +120,15 @@
     html += '<div class="label">Position ' + position + '</div>';
 
     for (const family of ["XFG", "PQ", "NB"]) {
-      for (const item of posData[family].changes) {
-        const barClass = (family === "XFG") ? "bar" : "bar bar-cousin";
-        html += '<div class="row">';
-        html += '<div class="label">' + family + " - " + item.change + '</div>';
-        html += '<div class="' + barClass + '" style="width:' + item.pct + '%">' + item.pct + '%</div>';
-        html += '</div>';
+      const item = dominant(posData[family].changes);
+      if (item === null) {
+        continue;
       }
+      const barClass = (family === "XFG") ? "bar" : "bar bar-cousin";
+      html += '<div class="row">';
+      html += '<div class="label">' + family + " - " + item.change + '</div>';
+      html += '<div class="' + barClass + '" style="width:' + item.pct + '%">' + item.pct + '%</div>';
+      html += '</div>';
     }
 
     card.innerHTML = html;
