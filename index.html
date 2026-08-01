@@ -80,9 +80,24 @@
   .rbd-track {
     position: relative;
     height: 40px;
-    background: #e8e8e8;
-    border-radius: 4px;
-    margin: 90px 0 40px 0;
+    margin: 130px 0 40px 0;
+  }
+  .seg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    box-sizing: border-box;
+    border: 1px solid #999;
+  }
+  .seg-core { background: #e8e8e8; }
+  .seg-rbm { background: #c5d9e8; }
+  .seg-label {
+    position: absolute;
+    bottom: -20px;
+    font-size: 10px;
+    color: #555;
+    transform: translateX(-50%);
+    white-space: nowrap;
   }
   .rbm-region {
     position: absolute;
@@ -92,12 +107,11 @@
   }
   .pos-dot {
     position: absolute;
-    top: 50%;
-    width: 5px;
-    height: 5px;
-    background: #4a90d9;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    transform: translateX(-50%);
+    z-index: 2;
   }
   .pos-label {
     position: absolute;
@@ -109,7 +123,7 @@
   .pos-line {
     position: absolute;
     width: 1px;
-    background: #999;
+    background: #090909;
     bottom: 50%;
   }
   .pos-line-diagonal {
@@ -163,7 +177,7 @@
     for (const item of changes) {
       sum += item.pct;
     }
-    return Math.round((100 - sum) / 10);
+    return Math.round((100 - sum) * 10/ 10);
   }
 
   function drawCard(figNum, position, data) {
@@ -206,10 +220,10 @@
     figures.appendChild(card);
   }
   function drawSchematic(figNum) {
-    const RBD_START = 330;
-    const RBD_END = 530;
-    const RBM_START = 437;
-    const RBM_END = 508;
+    const RBD_START = 333;
+    const RBD_END = 526;
+    const RBM_START = 438;
+    const RBM_END = 506;
 
     function toPercent(pos) {
       return (pos - RBD_START) / (RBD_END - RBD_START) * 100;
@@ -223,20 +237,35 @@
     html += '<div class="label">RBD position map (spike ' + RBD_START + '-' + RBD_END + ')</div>';
 
     html += '<div class="rbd-track">';
-    const rbmLeft = toPercent(RBM_START);
-    const rbmWidth = toPercent(RBM_END) - toPercent(RBM_START);
-    html += '<div class="rbm-region" style="left:' +rbmLeft + '%; width:' + rbmWidth + '%"></div>';
 
+    const rbmLeft = toPercent(RBM_START);
+    const rbmRight = toPercent(RBM_END);
+
+    // Three segments: core (left), RBM (middle), core (right)
+    html += '<div class="seg seg-core" style="left:0%; width:' + rbmLeft + '%"></div>';
+    html += '<div class="seg seg-rbm" style="left:' + rbmLeft + '%; width:' + (rbmRight - rbmLeft) + '%"></div>';
+    html += '<div class="seg seg-core" style="left:' + rbmRight + '%; width:' + (100 - rbmRight) + '%"></div>';
+
+    // Segment labels
+    html += '<div class="seg-label" style="left:' + (rbmLeft / 2) + '%">RBD core</div>';
+    html += '<div class="seg-label" style="left:' + ((rbmLeft + rbmRight) / 2) + '%">RBM (438-506)</div>';
+
+    // Position markers
     const mapped = [487, 445, 478, 346, 444];
     const heights = [70, 30, 50, 50, 60];
+    const colors = ["#4a90d9", "#e07b39", "#5cb85c", "#e04a6d", "#9b59b6"];
     mapped.forEach((pos, index) => {
       const left = toPercent(pos);
       const lineHeight = heights[index % heights.length];
+      const color = colors[index];
 
-      html += '<div class="pos-dot" style="left:' + left + '%"></div>';
+      let nudge = 0;
+      if (pos === 444) nudge = -1;
+      if (pos === 445) nudge = 1;
+      html += '<div class="pos-dot" style="left:calc(' + left + '% + ' + nudge + 'px); background:' + color + '"></div>';
 
       if (pos === 444) {
-        html += '<div class="pos-line pos-line-diagonal" style="left:' + left + '%; height:' + lineHeight + 'px" ></div>';
+        html += '<div class="pos-line pos-line-diagonal" style="left:' + left + '%; height:' + lineHeight + 'px"></div>';
         html += '<div class="pos-label" style="left:calc(' + left + '% - 20px); bottom:' + (lineHeight + 22) + 'px; top:auto">' + pos + '</div>';
       } else {
         html += '<div class="pos-line" style="left:' + left + '%; height:' + lineHeight + 'px"></div>';
